@@ -1,7 +1,24 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from "next/head";
+import styles from "../styles/Home.module.css";
+import { GetServerSideProps } from "next";
 
-export default function Home() {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const res = await fetch(`http://localhost:3000/api/hej}`);
+  const data = await res.json();
+  console.log(`lol: ${JSON.stringify(data)}`);
+  return { props: { data } };
+};
+
+// export async function getServerSideProps(context) {
+//   // Fetch data from external API
+//   const res = await fetch(`https://.../data`);
+//   const data = await res.json();
+
+//   // Pass data to the page via props
+//   return { props: { data } };
+// }
+
+export default function Home(props) {
   return (
     <div className={styles.container}>
       <Head>
@@ -11,11 +28,11 @@ export default function Home() {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          Welcome to <a href="https://nextjs.org"> {props.data.name}!</a>
         </h1>
 
         <p className={styles.description}>
-          Get started by editing{' '}
+          Get started by editing{" "}
           <code className={styles.code}>pages/index.js</code>
         </p>
 
@@ -56,10 +73,10 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Powered by{" "}
           <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
         </a>
       </footer>
     </div>
-  )
+  );
 }
