@@ -1,11 +1,9 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { querySingle, SQL } from "../../backend/util/db";
+import { NextApiRequest, NextApiResponse } from "next";
+import { load } from "server/noteController";
 
-export default async (req, res) => {
-  const noteid = req.query.note;
-  const queryResult = await querySingle(
-    SQL`SELECT data FROM note WHERE id = ${noteid}`
-  );
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  const noteid = req.query.note as string;
+  const notes = await load(noteid);
   res.statusCode = 200;
-  res.json(queryResult.data);
+  res.json(notes.data);
 };
