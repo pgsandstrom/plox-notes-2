@@ -1,6 +1,8 @@
 import { Note } from "types";
 import { useRef, useEffect } from "react";
 import Checkbox from "./checkbox";
+import Button from "./button";
+import { Cross } from "./icons";
 
 interface NoteRowProps {
   note: Note;
@@ -37,7 +39,7 @@ const NoteRow = ({
   }, [focus]);
 
   return (
-    <div key={note.id} className="note-row">
+    <div key={note.id} className={`note-row ${note.checked && "checked"}`}>
       <Checkbox
         checked={note.checked}
         onChange={() => {
@@ -63,6 +65,9 @@ const NoteRow = ({
         disabled={disabled}
         ref={inputRef}
       />
+      <Button>
+        <Cross style={{ marginTop: "8px" }} />
+      </Button>
       <style jsx>{`
         .note-row {
           display: flex;
@@ -74,12 +79,23 @@ const NoteRow = ({
           border-bottom: 1px solid gray;
           flex: 1 0 0;
           font-size: 1.2em;
-          height: 32px;
+          height: 28px;
+          margin-top: 4px;
+          margin-left: 10px;
           outline: none;
         }
 
         input:focus {
           border-bottom: 1px solid #009fd1;
+        }
+
+        .checked {
+          color: #bebfbf;
+        }
+
+        .checked input {
+          color: #bebfbf;
+          text-decoration: line-through;
         }
       `}</style>
     </div>

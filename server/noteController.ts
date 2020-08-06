@@ -1,4 +1,4 @@
-import { querySingle, SQL, queryString } from "./util/db";
+import { querySingle, SQL, query } from "./util/db";
 import { Note } from "types";
 import { v4 as uuidv4 } from "uuid";
 
@@ -7,7 +7,6 @@ export const load = async (id: string) => {
     SQL`SELECT data FROM note WHERE id = ${id}`
   );
   if (queryResult) {
-    console.log(`is note: ${JSON.stringify(queryResult)}`);
     return queryResult;
   } else {
     return {
@@ -27,8 +26,10 @@ export const save = async (id: string, notes: Note[]) => {
     SQL`SELECT data FROM note WHERE id = ${id}`
   );
   if (queryResult) {
-    return queryString(`UPDATE note SET data=${notes}::jsonb WHERE id = ${id}`);
+    return query(
+      SQL`UPDATE note SET data=${JSON.stringify(notes)}::jsonb WHERE id = ${id}`
+    );
   } else {
-    return queryString(`INSERT INTO note(id, data) VALUES(${id}, ${notes})`);
+    return query(SQL`INSERT INTO note(id, data) VALUES(${id}, ${notes})`);
   }
 };

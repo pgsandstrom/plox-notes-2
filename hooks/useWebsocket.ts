@@ -1,12 +1,13 @@
 import socketio from "socket.io-client";
 import { useEffect } from "react";
 import { Note } from "types";
+import getServerUrl from "server/util/serverUrl";
 
-export default (
+export default function useWebsocket(
   noteId: string,
   setError: (error?: string) => void,
   setNotes: (notes: Note[]) => void
-) => {
+) {
   //
   useEffect(() => {
     const socket = socketio(getServerUrl());
@@ -21,7 +22,6 @@ export default (
       setError("Connect timeout");
     });
     socket.on("load", (data: any) => {
-      console.log("load trough websocket");
       setNotes(data.notes as Note[]);
     });
     socket.on("ok", () => {
@@ -45,9 +45,4 @@ export default (
       setError("Reconnect failed");
     });
   }, []);
-};
-
-const getServerUrl = () => {
-  const port = location.port ? `:${location.port}` : "";
-  return `${window.location.protocol}//${window.location.hostname}${port}`;
-};
+}

@@ -6,6 +6,11 @@ import { Note } from "types";
 import { useState, useRef, useReducer } from "react";
 import useWebsocket from "hooks/useWebsocket";
 import NoteRow from "components/noteRow";
+import Button from "components/button";
+import { useDebounceCallback } from "hooks/useDebounce";
+import { load } from "server/noteController";
+import getServerUrl from "server/util/serverUrl";
+import { LoadIcon } from "components/icons";
 
 interface NoteProps {
   notes: Note[];
@@ -14,9 +19,8 @@ interface NoteProps {
 export const getServerSideProps: GetServerSideProps<NoteProps> = async (
   context
 ) => {
-  const res = await fetch(`http://localhost:3000/api/${context.params!.note}`);
-  const data = await res.json();
-  return { props: { notes: data } };
+  const data = await load(context.params!.note as string);
+  return { props: { notes: data.data } };
 };
 
 const newNote = (): Note => {
@@ -25,6 +29,14 @@ const newNote = (): Note => {
     text: "",
     checked: false,
   };
+};
+
+const saveNote = (noteid: string, notes: Note[]) => {
+  return fetch(`${getServerUrl()}/api/${noteid}/save`, {
+    method: "POST",
+    body: JSON.stringify(notes),
+    credentials: "same-origin",
+  });
 };
 
 //TODO test url like /Per/Och/Maria/Handlar
@@ -55,15 +67,23 @@ interface EditNoteAction {
   index: number;
 }
 
+interface UndoAction {
+  type: "UNDO_ACTION";
+}
+
 type NoteAction =
   | SetNoteAction
   | AddNoteAction
   | DeleteNoteAction
-  | EditNoteAction;
+  | EditNoteAction
+  | UndoAction;
 
 const NoteView = (props: NoteProps) => {
   const router = useRouter();
   const noteId = router.query.note as string;
+
+  const [ongoingSaves, setOngoingSaves] = useState(0);
+  const [hasSaved, setHasSaved] = useState(false);
 
   const [error, setError] = useState<string>();
   const [focusIndex, setFocusIndex] = useState<number>(props.notes.length - 1);
@@ -73,7 +93,7 @@ const NoteView = (props: NoteProps) => {
     return notes.length === 1 && notes[0].text === "";
   };
 
-  const [noteState, dispatch] = useReducer(
+  const [noteState, dispatchRaw] = useReducer(
     (state: NoteState, action: NoteAction) => {
       if (action.type === "SET_NOTE_ACTION") {
         return {
@@ -106,6 +126,14 @@ const NoteView = (props: NoteProps) => {
           ),
           history: [state.notes, ...state.history],
         };
+      } else if (action.type === "UNDO_ACTION") {
+        if (state.history.length === 0) {
+          return state;
+        }
+        return {
+          notes: state.history[0],
+          history: state.history.slice(1),
+        };
       } else {
         return state;
       }
@@ -115,6 +143,23 @@ const NoteView = (props: NoteProps) => {
       history: [],
     }
   );
+
+  const debounceSave = useDebounceCallback(async () => {
+    setOngoingSaves((os) => os + 1);
+    await saveNote(noteId, noteState.notes);
+    setOngoingSaves((os) => os - 1);
+    if (!hasSaved) {
+      setHasSaved(true);
+    }
+  }, 200);
+
+  // this is a hax to debounce a save on all actions, except SET_NOTE_ACTION. If we add any more actions that should not debounce a save, then rewrite this.
+  const dispatch = (action: NoteAction) => {
+    dispatchRaw(action);
+    if (action.type !== "SET_NOTE_ACTION") {
+      debounceSave();
+    }
+  };
 
   const setNotes = (notes: Note[]) => {
     dispatch({
@@ -151,12 +196,18 @@ const NoteView = (props: NoteProps) => {
     });
   };
 
+  const undo = () => {
+    dispatch({
+      type: "UNDO_ACTION",
+    });
+  };
+
   const hasFocused = () => (gainFocusRef.current = false);
 
   useWebsocket(noteId, setError, setNotes);
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", height: "100vh" }}>
       <Head>
         <title>{noteId}</title>
       </Head>
@@ -183,21 +234,47 @@ const NoteView = (props: NoteProps) => {
             {error}
           </div>
         )}
-        <h1>{noteId}</h1>
-        {noteState.notes.map((note, index) => (
-          <NoteRow
-            key={note.id}
-            note={note}
-            index={index}
-            focus={index === focusIndex && gainFocusRef.current === true}
-            hasFocused={hasFocused}
-            disabled={error !== undefined}
-            editNote={editNote}
-            addNote={addNote}
-            deleteNote={deleteNote}
-          />
-        ))}
+        <div style={{ fontSize: "2em", textAlign: "center", margin: "10px 0" }}>
+          {noteId}
+        </div>
+        <div style={{ flex: "1 0 0" }}>
+          {noteState.notes.map((note, index) => (
+            <NoteRow
+              key={note.id}
+              note={note}
+              index={index}
+              focus={index === focusIndex && gainFocusRef.current === true}
+              hasFocused={hasFocused}
+              disabled={error !== undefined}
+              editNote={editNote}
+              addNote={addNote}
+              deleteNote={deleteNote}
+            />
+          ))}
+        </div>
+        <footer
+          style={{ display: "flex", flex: "0 0 auto", marginBottom: "1px" }}
+        >
+          <Button
+            style={{ flex: "1 0 0", height: "50px" }}
+            onClick={() => addNote(noteState.notes.length)}
+          >
+            Add
+          </Button>
+          <Button style={{ flex: "1 0 0", height: "50px" }} onClick={undo}>
+            Undo
+          </Button>
+          <Button style={{ flex: "1 0 0", height: "50px" }}>
+            {ongoingSaves > 0 && <LoadIcon />}
+            {ongoingSaves === 0 && <>Save {hasSaved && "!!"}</>}
+          </Button>
+        </footer>
       </div>
+      <style jsx>{`
+        .plox {
+          flex: 1 0 0;
+        }
+      `}</style>
     </div>
   );
 };
