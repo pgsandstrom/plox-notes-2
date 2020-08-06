@@ -4,14 +4,14 @@ import { Note } from "types";
 
 export default (
   noteId: string,
-  setError: (error: string) => void,
+  setError: (error?: string) => void,
   setNotes: (notes: Note[]) => void
 ) => {
   //
   useEffect(() => {
     const socket = socketio(getServerUrl());
     socket.on("connect", () => {
-      setError("");
+      setError();
       socket.emit("setId", noteId);
     });
     socket.on("connect_error", () => {

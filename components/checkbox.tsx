@@ -1,8 +1,9 @@
 interface CheckboxProps {
   checked: boolean;
+  onChange: (checked: boolean) => void;
 }
 
-export default function Checkbox({ checked }: CheckboxProps) {
+export default function Checkbox({ checked, onChange }: CheckboxProps) {
   if (checked) {
     return (
       <svg
@@ -13,7 +14,8 @@ export default function Checkbox({ checked }: CheckboxProps) {
         role="img"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 448 512"
-        style={{ width: "20px" }}
+        style={{ width: "32px" }}
+        onClick={() => onChange(!checked)}
       >
         <path
           fill="currentColor"
@@ -31,7 +33,8 @@ export default function Checkbox({ checked }: CheckboxProps) {
         role="img"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 448 512"
-        style={{ width: "20px" }}
+        style={{ width: "32px" }}
+        onClick={() => onChange(!checked)}
       >
         <path
           fill="currentColor"
