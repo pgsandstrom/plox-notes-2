@@ -7,7 +7,7 @@ import { useState, useRef, useReducer } from "react";
 import useWebsocket from "hooks/useWebsocket";
 import NoteRow from "components/noteRow";
 import Button from "components/button";
-import { useDebounceCallback } from "hooks/useDebounce";
+import { useDebounceObject } from "hooks/useDebounce";
 import { load } from "server/noteController";
 import getServerUrl from "server/util/serverUrl";
 import { LoadIcon } from "components/icons";
@@ -44,6 +44,7 @@ const saveNote = (noteid: string, notes: Note[]) => {
 interface NoteState {
   notes: Note[];
   history: Note[][];
+  lastUserAction: number;
 }
 
 interface SetNoteAction {
@@ -93,7 +94,7 @@ const NoteView = (props: NoteProps) => {
     return notes.length === 1 && notes[0].text === "";
   };
 
-  const [noteState, dispatchRaw] = useReducer(
+  const [noteState, dispatch] = useReducer(
     (state: NoteState, action: NoteAction) => {
       if (action.type === "SET_NOTE_ACTION") {
         return {
@@ -101,6 +102,7 @@ const NoteView = (props: NoteProps) => {
           history: isNotesEmpty(state.notes)
             ? [...state.history]
             : [state.notes, ...state.history],
+          lastUserAction: state.lastUserAction,
         };
       } else if (action.type === "ADD_NOTE_ACTION") {
         return {
@@ -110,6 +112,7 @@ const NoteView = (props: NoteProps) => {
             ...state.notes.slice(action.index, state.notes.length),
           ],
           history: [state.notes, ...state.history],
+          lastUserAction: new Date().getTime(),
         };
       } else if (action.type === "DELETE_NOTE_ACTION") {
         return {
@@ -118,6 +121,7 @@ const NoteView = (props: NoteProps) => {
             ...state.notes.slice(action.index + 1, state.notes.length),
           ],
           history: [state.notes, ...state.history],
+          lastUserAction: new Date().getTime(),
         };
       } else if (action.type === "EDIT_NOTE_ACTION") {
         return {
@@ -125,6 +129,7 @@ const NoteView = (props: NoteProps) => {
             index === action.index ? action.note : note
           ),
           history: [state.notes, ...state.history],
+          lastUserAction: new Date().getTime(),
         };
       } else if (action.type === "UNDO_ACTION") {
         if (state.history.length === 0) {
@@ -133,6 +138,7 @@ const NoteView = (props: NoteProps) => {
         return {
           notes: state.history[0],
           history: state.history.slice(1),
+          lastUserAction: new Date().getTime(),
         };
       } else {
         return state;
@@ -141,25 +147,25 @@ const NoteView = (props: NoteProps) => {
     {
       notes: props.notes,
       history: [],
+      lastUserAction: 0,
     }
   );
 
-  const debounceSave = useDebounceCallback(async () => {
-    setOngoingSaves((os) => os + 1);
-    await saveNote(noteId, noteState.notes);
-    setOngoingSaves((os) => os - 1);
-    if (!hasSaved) {
-      setHasSaved(true);
-    }
-  }, 200);
+  useDebounceObject(
+    noteState.lastUserAction,
+    async () => {
+      if (noteState.lastUserAction > 0) {
+        setOngoingSaves((os) => os + 1);
+        await saveNote(noteId, noteState.notes);
+        setOngoingSaves((os) => os - 1);
 
-  // this is a hax to debounce a save on all actions, except SET_NOTE_ACTION. If we add any more actions that should not debounce a save, then rewrite this.
-  const dispatch = (action: NoteAction) => {
-    dispatchRaw(action);
-    if (action.type !== "SET_NOTE_ACTION") {
-      debounceSave();
-    }
-  };
+        if (!hasSaved) {
+          setHasSaved(true);
+        }
+      }
+    },
+    200
+  );
 
   const setNotes = (notes: Note[]) => {
     dispatch({
