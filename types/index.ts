@@ -11,3 +11,9 @@ export interface Note {
   text: string;
   checked: boolean;
 }
+
+export enum WEBSOCKET_COMMAND {
+  SET_ID = "SET_ID",
+  POST = "POST",
+  LOAD = "LOAD",
+}

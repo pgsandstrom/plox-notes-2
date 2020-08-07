@@ -2,7 +2,7 @@ import Head from "next/head";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
-import { Note } from "types";
+import { Note, WEBSOCKET_COMMAND } from "types";
 import { useState, useRef, useReducer } from "react";
 import useWebsocket from "hooks/useWebsocket";
 import NoteRow from "components/noteRow";
@@ -154,14 +154,9 @@ const NoteView = (props: NoteProps) => {
   useDebounceObject(
     noteState.lastUserAction,
     async () => {
+      console.log("debouncne " + noteState.lastUserAction);
       if (noteState.lastUserAction > 0) {
-        setOngoingSaves((os) => os + 1);
-        await saveNote(noteId, noteState.notes);
-        setOngoingSaves((os) => os - 1);
-
-        if (!hasSaved) {
-          setHasSaved(true);
-        }
+        saveThroughWebsocket();
       }
     },
     200
@@ -210,7 +205,35 @@ const NoteView = (props: NoteProps) => {
 
   const hasFocused = () => (gainFocusRef.current = false);
 
-  useWebsocket(noteId, setError, setNotes);
+  const saveThroughApi = async () => {
+    setOngoingSaves((os) => os + 1);
+    await saveNote(noteId, noteState.notes);
+    setOngoingSaves((os) => os - 1);
+
+    if (!hasSaved) {
+      setHasSaved(true);
+    }
+  };
+
+  const websocketSaveComplete = () => {
+    setOngoingSaves((os) => os - 1);
+
+    if (!hasSaved) {
+      setHasSaved(true);
+    }
+  };
+
+  const websocketEmit = useWebsocket(
+    noteId,
+    setError,
+    setNotes,
+    websocketSaveComplete
+  );
+
+  const saveThroughWebsocket = () => {
+    setOngoingSaves((os) => os + 1);
+    websocketEmit!(WEBSOCKET_COMMAND.POST, noteState.notes);
+  };
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>
@@ -270,7 +293,10 @@ const NoteView = (props: NoteProps) => {
           <Button style={{ flex: "1 0 0", height: "50px" }} onClick={undo}>
             Undo
           </Button>
-          <Button style={{ flex: "1 0 0", height: "50px" }}>
+          <Button
+            style={{ flex: "1 0 0", height: "50px" }}
+            onClick={saveThroughApi}
+          >
             {ongoingSaves > 0 && <LoadIcon />}
             {ongoingSaves === 0 && <>Save {hasSaved && "!!"}</>}
           </Button>
