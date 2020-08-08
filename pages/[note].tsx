@@ -2,7 +2,7 @@ import Head from "next/head";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
-import { Note, WEBSOCKET_COMMAND } from "types";
+import { Note, NotePost } from "types";
 import { useState, useRef, useReducer } from "react";
 import useWebsocket from "hooks/useWebsocket";
 import NoteRow from "components/noteRow";
@@ -11,6 +11,7 @@ import { useDebounceObject } from "hooks/useDebounce";
 import { load } from "server/noteController";
 import getServerUrl from "server/util/serverUrl";
 import { LoadIcon } from "components/icons";
+import { WEBSOCKET_COMMAND } from "server/websocketConstants";
 
 interface NoteProps {
   notes: Note[];
@@ -232,7 +233,8 @@ const NoteView = (props: NoteProps) => {
 
   const saveThroughWebsocket = () => {
     setOngoingSaves((os) => os + 1);
-    websocketEmit!(WEBSOCKET_COMMAND.POST, noteState.notes);
+    const notePost: NotePost = { id: noteId, notes: noteState.notes };
+    websocketEmit!(WEBSOCKET_COMMAND.POST, notePost);
   };
 
   return (

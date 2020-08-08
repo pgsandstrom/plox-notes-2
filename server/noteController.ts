@@ -22,6 +22,13 @@ export const load = async (id: string) => {
 };
 
 export const save = async (id: string, notes: Note[]) => {
+  if (notes === null || notes === undefined || !Array.isArray(notes)) {
+    throw new Error(`save received wrong data: ${JSON.stringify(notes)}`);
+  }
+  if (notes.length > 0 && notes[0].text === undefined) {
+    throw new Error(`save received wrong row data: ${JSON.stringify(notes)}`);
+  }
+
   const queryResult = await querySingle<Note[]>(
     SQL`SELECT data FROM note WHERE id = ${id}`
   );

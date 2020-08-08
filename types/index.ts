@@ -12,8 +12,7 @@ export interface Note {
   checked: boolean;
 }
 
-export enum WEBSOCKET_COMMAND {
-  SET_ID = "SET_ID",
-  POST = "POST",
-  LOAD = "LOAD",
+export interface NotePost {
+  id: string;
+  notes: Note[];
 }
