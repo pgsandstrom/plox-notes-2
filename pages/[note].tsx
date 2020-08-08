@@ -1,4 +1,5 @@
 import Head from "next/head";
+import FlipMove from "react-flip-move";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
@@ -276,19 +277,21 @@ const NoteView = (props: NoteProps) => {
           {noteId}
         </div>
         <div style={{ flex: "1 0 0" }}>
-          {noteState.notes.map((note, index) => (
-            <NoteRow
-              key={note.id}
-              note={note}
-              index={index}
-              focus={index === focusIndex && gainFocusRef.current === true}
-              hasFocused={hasFocused}
-              disabled={error !== undefined}
-              editNote={editNote}
-              addNote={addNote}
-              deleteNote={deleteNote}
-            />
-          ))}
+          <FlipMove duration={200}>
+            {noteState.notes.map((note, index) => (
+              <NoteRow
+                key={note.id}
+                note={note}
+                index={index}
+                focus={index === focusIndex && gainFocusRef.current === true}
+                hasFocused={hasFocused}
+                disabled={error !== undefined}
+                editNote={editNote}
+                addNote={addNote}
+                deleteNote={deleteNote}
+              />
+            ))}
+          </FlipMove>
         </div>
         <footer
           style={{ display: "flex", flex: "0 0 auto", marginBottom: "1px" }}
