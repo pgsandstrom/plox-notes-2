@@ -35,7 +35,6 @@ export default function useWebsocket(
       setNotes(data.notes as Note[]);
     });
     socket.on("ok", () => {
-      console.log("receive ok");
       saveComplete();
     });
     socket.on("connect_error", () => {
@@ -46,7 +45,7 @@ export default function useWebsocket(
     });
     socket.on("error", (errorObj: any) => {
       setError("Connect error");
-      console.log(JSON.stringify(errorObj));
+      console.log(`error: ${JSON.stringify(errorObj)}`);
     });
     socket.on("reconnect_error", (_errorObj: any) => {
       setError("Reconnect error");
@@ -58,7 +57,6 @@ export default function useWebsocket(
 
   // TODO use typescript and types for "command"
   return (command: string, data: {}) => {
-    console.log(`emitting ${command} with ${JSON.stringify(data)}`);
     socketRef.current!.emit(command, data);
   };
 }

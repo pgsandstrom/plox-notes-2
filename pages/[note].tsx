@@ -126,9 +126,17 @@ const NoteView = (props: NoteProps) => {
         };
       } else if (action.type === "EDIT_NOTE_ACTION") {
         return {
-          notes: state.notes.map((note, index) =>
-            index === action.index ? action.note : note
-          ),
+          notes: state.notes
+            .map((note, index) => (index === action.index ? action.note : note))
+            .sort((a, b) => {
+              if (a.checked === b.checked) {
+                return 0;
+              } else if (a.checked) {
+                return -1;
+              } else {
+                return 1;
+              }
+            }),
           history: [state.notes, ...state.history],
           lastUserAction: new Date().getTime(),
         };
@@ -155,7 +163,6 @@ const NoteView = (props: NoteProps) => {
   useDebounceObject(
     noteState.lastUserAction,
     async () => {
-      console.log("debouncne " + noteState.lastUserAction);
       if (noteState.lastUserAction > 0) {
         saveThroughWebsocket();
       }

@@ -31,7 +31,6 @@ export default (io: socketio.Server) => {
     });
     socket.on(WEBSOCKET_COMMAND.POST, (data: NotePost) => {
       const { id, notes } = data;
-      console.log(`server receinved post: ${JSON.stringify(data)}`);
       save(id, notes).then(() => {
         Object.keys(activeSockets)
           .filter((socketId) => socketId !== socket.id) // Remove own socket
