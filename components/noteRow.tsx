@@ -73,8 +73,11 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
           disabled={disabled}
           ref={inputRef}
         />
-        <Button>
-          <Cross style={{ marginTop: "8px" }} />
+        <Button
+          onClick={() => deleteNote(index)}
+          style={{ height: "32px", marginTop: "0px" }}
+        >
+          <Cross style={{ marginTop: "8px", width: "16px" }} />
         </Button>
         <style jsx>{`
           .note-row {

@@ -11,7 +11,7 @@ import Button from "components/button";
 import { useDebounceObject } from "hooks/useDebounce";
 import { load } from "server/noteController";
 import getServerUrl from "server/util/serverUrl";
-import { LoadIcon } from "components/icons";
+import { LoadIcon, Check } from "components/icons";
 import { WEBSOCKET_COMMAND } from "server/websocketConstants";
 
 interface NoteProps {
@@ -86,7 +86,6 @@ const NoteView = (props: NoteProps) => {
   const noteId = router.query.note as string;
 
   const [ongoingSaves, setOngoingSaves] = useState(0);
-  const [hasSaved, setHasSaved] = useState(false);
 
   const [error, setError] = useState<string>();
   const [focusIndex, setFocusIndex] = useState<number>(props.notes.length - 1);
@@ -168,7 +167,7 @@ const NoteView = (props: NoteProps) => {
         saveThroughWebsocket();
       }
     },
-    200
+    0 // we don't really debounce currently, so others viewing the document gets updated immediately.
   );
 
   const setNotes = (notes: Note[]) => {
@@ -218,18 +217,10 @@ const NoteView = (props: NoteProps) => {
     setOngoingSaves((os) => os + 1);
     await saveNote(noteId, noteState.notes);
     setOngoingSaves((os) => os - 1);
-
-    if (!hasSaved) {
-      setHasSaved(true);
-    }
   };
 
   const websocketSaveComplete = () => {
     setOngoingSaves((os) => os - 1);
-
-    if (!hasSaved) {
-      setHasSaved(true);
-    }
   };
 
   const websocketEmit = useWebsocket(
@@ -309,8 +300,9 @@ const NoteView = (props: NoteProps) => {
             style={{ flex: "1 0 0", height: "50px" }}
             onClick={saveThroughApi}
           >
-            {ongoingSaves > 0 && <LoadIcon />}
-            {ongoingSaves === 0 && <>Save {hasSaved && "!!"}</>}
+            <span style={{ paddingRight: "5px" }}>Save</span>
+            {ongoingSaves > 0 && <LoadIcon style={{ width: "16px" }} />}
+            {ongoingSaves === 0 && <Check style={{ width: "16px" }} />}
           </Button>
         </footer>
       </div>
