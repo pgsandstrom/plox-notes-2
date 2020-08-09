@@ -3,6 +3,11 @@ body {
   padding: 0;
   margin: 0;
   font-family: Arial, sans-serif;
+  height: 100%;
+}
+
+#__next {
+  height: 100%;
 }
 
 input {
