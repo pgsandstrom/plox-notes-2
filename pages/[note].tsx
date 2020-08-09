@@ -167,7 +167,7 @@ const NoteView = (props: NoteProps) => {
         saveThroughWebsocket();
       }
     },
-    0 // we don't really debounce currently, so others viewing the document gets updated immediately.
+    0 // we don't debounce currently, so others viewing the document gets updated immediately.
   );
 
   const setNotes = (notes: Note[]) => {
