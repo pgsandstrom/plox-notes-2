@@ -183,6 +183,7 @@ const NoteView = (props: NoteProps) => {
       type: 'DELETE_NOTE_ACTION',
       index,
     })
+    // TODO only do it if an input already had focus
     if (index > 0) {
       setFocusIndex(index - 1)
       gainFocusRef.current = true
@@ -252,23 +253,21 @@ const NoteView = (props: NoteProps) => {
           </div>
         )}
         <div style={{ fontSize: '2em', textAlign: 'center', margin: '10px 0' }}>{noteId}</div>
-        <div style={{ flex: '1 0 0' }}>
-          <FlipMove duration={200}>
-            {noteState.notes.map((note, index) => (
-              <NoteRow
-                key={note.id}
-                note={note}
-                index={index}
-                focus={index === focusIndex && gainFocusRef.current === true}
-                hasFocused={hasFocused}
-                disabled={error !== undefined}
-                editNote={editNote}
-                addNote={addNote}
-                deleteNote={deleteNote}
-              />
-            ))}
-          </FlipMove>
-        </div>
+        <FlipMove duration={200} style={{ flex: '1 0 0', overflowY: 'auto' }}>
+          {noteState.notes.map((note, index) => (
+            <NoteRow
+              key={note.id}
+              note={note}
+              index={index}
+              focus={index === focusIndex && gainFocusRef.current === true}
+              hasFocused={hasFocused}
+              disabled={error !== undefined}
+              editNote={editNote}
+              addNote={addNote}
+              deleteNote={deleteNote}
+            />
+          ))}
+        </FlipMove>
         <footer style={{ display: 'flex', flex: '0 0 auto', marginBottom: '1px' }}>
           <Button
             style={{ flex: '1 0 0', height: '50px' }}
@@ -289,6 +288,11 @@ const NoteView = (props: NoteProps) => {
       <style jsx>{`
         .plox {
           flex: 1 0 0;
+        }
+      `}</style>
+      <style jsx global>{`
+        html {
+          overflow-y: hidden;
         }
       `}</style>
     </div>

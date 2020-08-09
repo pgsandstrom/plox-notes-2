@@ -5,6 +5,7 @@ set -u
 cd "$(dirname "$0")"
 
 ./prep_repo_for_deploy.sh
+# TODO a super cool thing would be if the script could detect that the git update changed this script, and then abort. Or even reload itself.
 
 # TODO maybe move typescript stuff to dependency and then run this instead?
 # npm install --only=prod
