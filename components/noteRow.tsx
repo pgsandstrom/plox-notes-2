@@ -42,6 +42,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
           }}
         />
         <input
+          className="note-row-input"
           value={note.text}
           onChange={(e) => editNote({ ...note, text: e.target.value }, index)}
           onKeyPress={(e) => {

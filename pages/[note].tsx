@@ -183,8 +183,13 @@ const NoteView = (props: NoteProps) => {
       type: 'DELETE_NOTE_ACTION',
       index,
     })
-    // TODO only do it if an input already had focus
-    if (index > 0) {
+    // Only set the focus if we currently focus a note row input
+    // This is to avoid just clicking the delete button and the onscreen keyboard showing up on mobile
+    if (
+      index > 0 &&
+      document.activeElement &&
+      document.activeElement.className.includes('note-row-input')
+    ) {
       setFocusIndex(index - 1)
       gainFocusRef.current = true
     }
