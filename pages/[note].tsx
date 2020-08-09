@@ -224,7 +224,7 @@ const NoteView = (props: NoteProps) => {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100%' }}>
       <Head>
         <title>{noteId}</title>
       </Head>
