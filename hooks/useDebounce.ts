@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 // this version debounces when obj is changed.
-export function useDebounceObject(obj: {}, callback: () => void, timeout: number) {
+export function useDebounceObject(obj: unknown, callback: () => void, timeout: number) {
   useEffect(() => {
     const timer = setTimeout(callback, timeout)
     return () => {

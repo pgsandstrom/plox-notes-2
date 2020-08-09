@@ -22,9 +22,11 @@ export const load = async (id: string) => {
 }
 
 export const save = async (id: string, notes: Note[]) => {
+  // eslint-disable-next-line
   if (notes === null || notes === undefined || !Array.isArray(notes)) {
     throw new Error(`save received wrong data: ${JSON.stringify(notes)}`)
   }
+  // eslint-disable-next-line
   if (notes.length > 0 && notes[0].text === undefined) {
     throw new Error(`save received wrong row data: ${JSON.stringify(notes)}`)
   }

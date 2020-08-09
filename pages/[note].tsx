@@ -131,6 +131,7 @@ const NoteView = (props: NoteProps) => {
           history: [state.notes, ...state.history],
           lastUserAction: new Date().getTime(),
         }
+        //eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       } else if (action.type === 'UNDO_ACTION') {
         if (state.history.length === 0) {
           return state
@@ -153,7 +154,7 @@ const NoteView = (props: NoteProps) => {
 
   useDebounceObject(
     noteState.lastUserAction,
-    async () => {
+    () => {
       if (noteState.lastUserAction > 0) {
         saveThroughWebsocket()
       }
@@ -219,7 +220,7 @@ const NoteView = (props: NoteProps) => {
   const saveThroughWebsocket = () => {
     setOngoingSaves((os) => os + 1)
     const notePost: NotePost = { id: noteId, notes: noteState.notes }
-    websocketEmit!(WEBSOCKET_COMMAND.POST, notePost)
+    websocketEmit(WEBSOCKET_COMMAND.POST, notePost)
   }
 
   return (

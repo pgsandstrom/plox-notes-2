@@ -6,7 +6,11 @@
     "dev": "nodemon",
     "build": "next build && tsc --project tsconfig.server.json",
     "format": "prettier --write \"{,!(.next|node_modules)}/**/*.{json,md,ts,tsx,css,scss}\"",
-    "start": "cross-env NODE_ENV=production node dist/server/index.js"
+    "lint": "node ./node_modules/eslint/bin/eslint.js --ext .ts --ext .tsx --fix .",
+    "pre-commit": "lint-staged",
+    "pre-push": "npm run lint && npm run typecheck",
+    "start": "cross-env NODE_ENV=production node dist/server/index.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "cross-env": "7.0.2",
@@ -31,8 +35,29 @@
     "@types/socket.io": "2.1.10",
     "@types/socket.io-client": "1.4.33",
     "@types/uuid": "8.0.1",
+    "@typescript-eslint/eslint-plugin": "3.8.0",
+    "@typescript-eslint/parser": "3.8.0",
+    "eslint": "7.6.0",
+    "eslint-config-prettier": "6.11.0",
+    "husky": "4.2.5",
+    "lint-staged": "10.2.11",
     "prettier": "2.0.5",
     "typescript": "4.0.1-rc"
   },
-  "//": "typescript needs to be 4 (currently beta) due to this: https://github.com/microsoft/TypeScript/issues/38383"
+  "//": "typescript needs to be 4 (currently beta) due to this: https://github.com/microsoft/TypeScript/issues/38383",
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run pre-commit",
+      "pre-push": "npm run pre-push"
+    }
+  },
+  "lint-staged": {
+    "*.{json,md,css,scss}": [
+      "prettier --write"
+    ],
+    "*.{ts,tsx}": [
+      "node ./node_modules/eslint/bin/eslint.js --ext .ts --ext .tsx --fix",
+      "prettier --write"
+    ]
+  }
 }

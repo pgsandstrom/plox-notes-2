@@ -42,7 +42,7 @@ const getSingle = <T>(result: QueryResult): T | undefined => {
   } else if (result.rowCount === 0) {
     return undefined
   } else {
-    return result.rows[0]
+    return result.rows[0] as T
   }
 }
 
@@ -50,7 +50,7 @@ const getSingle = <T>(result: QueryResult): T | undefined => {
 export const getClient = (): Promise<PoolClient> =>
   new Promise((resolve, reject) => {
     getDbPool().connect((err, client: PoolClient) => {
-      // tslint:disable-next-line: strict-type-predicates
+      // eslint-disable-next-line
       if (err !== undefined) {
         reject(err)
       } else {
@@ -60,6 +60,7 @@ export const getClient = (): Promise<PoolClient> =>
   })
 
 export const SQL = (parts: TemplateStringsArray, ...values: any[]): QueryConfig => ({
-  text: parts.reduce((prev, curr, i) => prev + '$' + i + curr), // eslint-disable-line prefer-template
+  // eslint-disable-next-line
+  text: parts.reduce((prev, curr, i) => prev + '$' + i + curr),
   values,
 })

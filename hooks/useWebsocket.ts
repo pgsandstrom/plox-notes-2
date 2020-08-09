@@ -1,6 +1,6 @@
 import socketio from 'socket.io-client'
 import { useRef } from 'react'
-import { Note } from 'types'
+import { Note, NotePost } from 'types'
 import getServerUrl from 'server/util/serverUrl'
 import { WEBSOCKET_COMMAND } from 'server/websocketConstants'
 
@@ -10,9 +10,10 @@ export default function useWebsocket(
   setError: (error?: string) => void,
   setNotes: (notes: Note[]) => void,
   saveComplete: () => void,
-): (command: string, data: {}) => void {
+): (command: string, data: unknown) => void {
   // hax so websocket stuff is not ran on SSR
   if (typeof window === 'undefined') {
+    // eslint-disable-next-line
     return {} as any
   }
 
@@ -31,8 +32,8 @@ export default function useWebsocket(
     socket.on('connect_timeout', () => {
       setError('Connect timeout')
     })
-    socket.on(WEBSOCKET_COMMAND.LOAD, (data: any) => {
-      setNotes(data.notes as Note[])
+    socket.on(WEBSOCKET_COMMAND.LOAD, (data: NotePost) => {
+      setNotes(data.notes)
     })
     socket.on('ok', () => {
       saveComplete()
@@ -56,7 +57,7 @@ export default function useWebsocket(
   }
 
   // TODO use typescript and types for "command"
-  return (command: string, data: {}) => {
+  return (command: string, data: unknown) => {
     socketRef.current!.emit(command, data)
   }
 }
