@@ -1,5 +1,5 @@
-import Head from "next/head";
-import styles from "../styles/Home.module.css";
+import Head from 'next/head'
+import styles from '../styles/Home.module.css'
 
 export default function Home() {
   //TODO fix this whole page.
@@ -15,5 +15,5 @@ export default function Home() {
 
       <footer className={styles.footer}>Powered by me</footer>
     </div>
-  );
+  )
 }

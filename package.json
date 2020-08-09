@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "next build && tsc --project tsconfig.server.json",
+    "format": "prettier --write \"{,!(.next|node_modules)}/**/*.{json,md,ts,tsx,css,scss}\"",
     "start": "cross-env NODE_ENV=production node dist/server/index.js"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
     "@types/socket.io": "2.1.10",
     "@types/socket.io-client": "1.4.33",
     "@types/uuid": "8.0.1",
+    "prettier": "2.0.5",
     "typescript": "4.0.1-rc"
   },
   "//": "typescript needs to be 4 (currently beta) due to this: https://github.com/microsoft/TypeScript/issues/38383"
