@@ -11,10 +11,6 @@ interface NoteConnection {
 
 const activeSockets: PartialDict<string, NoteConnection> = {}
 
-// const WEBSOCKET_COMMAND_SET_ID = "SET_ID";
-// const WEBSOCKET_COMMAND_POST = "POST";
-// const WEBSOCKET_COMMAND_LOAD = "LOAD";
-
 export default (io: socketio.Server) => {
   // TODO really using the rest interface to update data should trigger all websockets to send out new data... but you know...
   io.sockets.on('connection', (socket) => {
@@ -31,7 +27,10 @@ export default (io: socketio.Server) => {
           socket.emit(WEBSOCKET_COMMAND.LOAD, noteData)
         })
         // TODO send out error to client when loading or saving fails
-        .catch(() => console.error(`failed loading note ${noteId}`))
+        .catch(() => {
+          console.error(`failed loading note ${noteId}`)
+          socket.emit(WEBSOCKET_COMMAND.SERVER_ERROR, 'Load error')
+        })
     })
     socket.on(WEBSOCKET_COMMAND.POST, (data: NotePost) => {
       const { id, notes } = data
@@ -44,7 +43,10 @@ export default (io: socketio.Server) => {
             .forEach((otherSocket) => otherSocket.emit(WEBSOCKET_COMMAND.LOAD, { id, notes }))
           socket.emit('ok')
         })
-        .catch(() => console.error(`failed saving note ${id}`))
+        .catch(() => {
+          console.error(`failed saving note ${id}`)
+          socket.emit(WEBSOCKET_COMMAND.SERVER_ERROR, 'Save error')
+        })
     })
     socket.on('disconnect', () => {
       delete activeSockets[socket.id]

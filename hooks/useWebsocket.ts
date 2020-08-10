@@ -35,6 +35,9 @@ export default function useWebsocket(
     socket.on(WEBSOCKET_COMMAND.LOAD, (data: NotePost) => {
       setNotes(data.notes)
     })
+    socket.on(WEBSOCKET_COMMAND.SERVER_ERROR, (data: string) => {
+      setError(data)
+    })
     socket.on('ok', () => {
       saveComplete()
     })
@@ -56,7 +59,6 @@ export default function useWebsocket(
     })
   }
 
-  // TODO use typescript and types for "command"
   return (command: string, data: unknown) => {
     socketRef.current!.emit(command, data)
   }
