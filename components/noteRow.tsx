@@ -33,6 +33,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
       }
     }, [focus])
 
+    // TODO support multi row entries
     return (
       <div key={note.id} ref={ref} className={`note-row ${note.checked && 'checked'}`}>
         <Checkbox
