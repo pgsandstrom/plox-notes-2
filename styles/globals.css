@@ -10,6 +10,10 @@ body {
   height: 100%;
 }
 
+button {
+  color: unset;
+}
+
 input {
   font-family: Arial, sans-serif;
 }
