@@ -2,10 +2,8 @@ import { querySingle, SQL, query } from './util/db'
 import { Note } from 'types'
 import { v4 as uuidv4 } from 'uuid'
 
-export const load = async (id: string) => {
-  const queryResult = await querySingle<{ data: Note[] }>(
-    SQL`SELECT data FROM note WHERE id = ${id}`,
-  )
+export const loadOrShowNew = async (id: string) => {
+  const queryResult = await load(id)
   if (queryResult) {
     return queryResult
   } else {
@@ -21,6 +19,13 @@ export const load = async (id: string) => {
   }
 }
 
+export const load = async (id: string) => {
+  const queryResult = await querySingle<{ data: Note[] }>(
+    SQL`SELECT data FROM note WHERE id = ${id}`,
+  )
+  return queryResult
+}
+
 export const save = async (id: string, notes: Note[]) => {
   // eslint-disable-next-line
   if (notes === null || notes === undefined || !Array.isArray(notes)) {
@@ -31,10 +36,9 @@ export const save = async (id: string, notes: Note[]) => {
     throw new Error(`save received wrong row data: ${JSON.stringify(notes)}`)
   }
 
-  const queryResult = await querySingle<Note[]>(SQL`SELECT data FROM note WHERE id = ${id}`)
-  if (queryResult) {
-    return query(SQL`UPDATE note SET data=${JSON.stringify(notes)}::jsonb WHERE id = ${id}`)
-  } else {
-    return query(SQL`INSERT INTO note(id, data) VALUES(${id}, ${notes})`)
-  }
+  const queryResult = await query(SQL`INSERT INTO note(id, data) VALUES(${id}, ${JSON.stringify(
+    notes,
+  )})
+  ON CONFLICT(id) DO UPDATE SET data=${JSON.stringify(notes)}::jsonb`)
+  return queryResult
 }

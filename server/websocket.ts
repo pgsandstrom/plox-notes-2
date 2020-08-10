@@ -21,10 +21,14 @@ export default (io: socketio.Server) => {
       }
       activeSockets[socket.id]!.noteId = noteId
       // When client clarifies who they are, send out the data to them!
+      // Is this really necessary? Only matters if data updated between page load and websocket connection
+      // Maybe remove this...
       load(noteId)
         .then((notes) => {
-          const noteData: NotePost = { id: noteId, notes: notes.data }
-          socket.emit(WEBSOCKET_COMMAND.LOAD, noteData)
+          if (notes) {
+            const noteData: NotePost = { id: noteId, notes: notes.data }
+            socket.emit(WEBSOCKET_COMMAND.LOAD, noteData)
+          }
         })
         // TODO send out error to client when loading or saving fails
         .catch(() => {

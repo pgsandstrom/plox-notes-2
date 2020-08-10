@@ -9,7 +9,7 @@ import useWebsocket from 'hooks/useWebsocket'
 import NoteRow from 'components/noteRow'
 import Button from 'components/button'
 import { useDebounceObject } from 'hooks/useDebounce'
-import { load } from 'server/noteController'
+import { loadOrShowNew } from 'server/noteController'
 import getServerUrl from 'server/util/serverUrl'
 import { LoadIcon, Check } from 'components/icons'
 import { WEBSOCKET_COMMAND } from 'server/websocketConstants'
@@ -19,7 +19,7 @@ interface NoteProps {
 }
 
 export const getServerSideProps: GetServerSideProps<NoteProps> = async (context) => {
-  const data = await load(context.params!.note as string)
+  const data = await loadOrShowNew(context.params!.note as string)
   return { props: { notes: data.data } }
 }
 
@@ -30,16 +30,6 @@ const newNote = (): Note => {
     checked: false,
   }
 }
-
-const saveNote = (noteid: string, notes: Note[]) => {
-  return fetch(`${getServerUrl()}/api/${noteid}/save`, {
-    method: 'POST',
-    body: JSON.stringify(notes),
-    credentials: 'same-origin',
-  })
-}
-
-//TODO test url like /Per/Och/Maria/Handlar
 
 interface NoteState {
   notes: Note[]
@@ -213,7 +203,11 @@ const NoteView = (props: NoteProps) => {
 
   const saveThroughApi = async () => {
     setOngoingSaves((os) => os + 1)
-    await saveNote(noteId, noteState.notes)
+    await fetch(`${getServerUrl()}/api/${noteId}/save`, {
+      method: 'POST',
+      body: JSON.stringify(noteState.notes),
+      credentials: 'same-origin',
+    })
     setOngoingSaves((os) => os - 1)
   }
 
