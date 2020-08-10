@@ -1,13 +1,12 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useState, MouseEvent } from 'react'
+import { useState } from 'react'
 
 export default function Home() {
   const router = useRouter()
   const [id, setId] = useState('')
 
-  const goToPage = (e: MouseEvent) => {
-    e.preventDefault()
+  const goToPage = () => {
     void router.push('/[note]', `/${id}`)
   }
 
@@ -44,7 +43,16 @@ export default function Home() {
             Share the checklist by simply sending the URL to your friends. Secure? Not completely.
             But it sure is simple. And no one cares about your shoppling list anyway.
           </div>
-          <input value={id} onChange={(e) => setId(e.target.value)} />
+          <input
+            value={id}
+            onChange={(e) => setId(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                goToPage()
+              }
+            }}
+          />
           <button onClick={goToPage}>Go</button>
         </main>
 
