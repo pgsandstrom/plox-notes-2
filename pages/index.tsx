@@ -4,9 +4,11 @@ import { useState } from 'react'
 
 export default function Home() {
   const router = useRouter()
+  const [isRouting, setIsRouting] = useState(false)
   const [id, setId] = useState('')
 
   const goToPage = () => {
+    setIsRouting(true)
     void router.push('/[note]', `/${id}`)
   }
 
@@ -52,8 +54,11 @@ export default function Home() {
                 goToPage()
               }
             }}
+            disabled={isRouting}
           />
-          <button onClick={goToPage}>Go</button>
+          <button onClick={goToPage} disabled={isRouting}>
+            Go
+          </button>
         </main>
 
         <footer
