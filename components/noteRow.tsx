@@ -1,4 +1,5 @@
 import { Note } from 'types'
+import TextareaAutosize from 'react-textarea-autosize'
 import { useRef, useEffect, forwardRef } from 'react'
 import Checkbox from './checkbox'
 import Button from './button'
@@ -20,7 +21,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
     { note, index, focus, hasFocused, disabled, editNote, addNote, deleteNote }: NoteRowProps,
     ref,
   ) => {
-    const inputRef = useRef<HTMLInputElement>(null)
+    const inputRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
       const inputElement = inputRef.current
@@ -33,7 +34,8 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
       }
     }, [focus])
 
-    // TODO support multi row entries
+    // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
+    // But resolve does not seem to be bundled with nextjs. Find a neat solution.
     return (
       <div key={note.id} ref={ref} className={`note-row ${note.checked && 'checked'}`}>
         <Checkbox
@@ -42,7 +44,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
             editNote({ ...note, checked: !note.checked }, index)
           }}
         />
-        <input
+        <TextareaAutosize
           className="note-row-input"
           value={note.text}
           onChange={(e) => editNote({ ...note, text: e.target.value }, index)}
@@ -62,27 +64,29 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
           disabled={disabled}
           ref={inputRef}
         />
-        <Button onClick={() => deleteNote(index)} style={{ height: '32px', marginTop: '0px' }}>
+        <Button onClick={() => deleteNote(index)} style={{ height: '32px', marginTop: '-4px' }}>
           <Cross style={{ marginTop: '8px', width: '16px' }} />
         </Button>
-        <style jsx>{`
+        <style jsx global>{`
           .note-row {
             display: flex;
+            align-items: center;
             margin: 6px 0;
           }
 
-          input {
+          .note-row-input {
             border: none;
             border-bottom: 1px solid gray;
             flex: 1 0 0;
             font-size: 1.2em;
             height: 28px;
-            margin-top: 4px;
             margin-left: 10px;
+            line-height: 28px;
             outline: none;
+            resize: none;
           }
 
-          input:focus {
+          .note-row-input:focus {
             border-bottom: 1px solid #009fd1;
           }
 
@@ -90,7 +94,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
             color: #bebfbf;
           }
 
-          .checked input {
+          .checked .note-row-input {
             color: #bebfbf;
             text-decoration: line-through;
           }

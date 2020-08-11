@@ -14,7 +14,8 @@ button {
   color: unset;
 }
 
-input {
+input,
+textarea {
   font-family: Arial, sans-serif;
 }
 
