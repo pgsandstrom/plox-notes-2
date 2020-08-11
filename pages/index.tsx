@@ -43,7 +43,7 @@ export default function Home() {
           </div>
           <div className="intro-text">
             Share the checklist by simply sending the URL to your friends. Secure? Not completely.
-            But it sure is simple. And no one cares about your shoppling list anyway.
+            But it sure is simple. And no one cares about your shopping list anyway.
           </div>
           <input
             value={id}
