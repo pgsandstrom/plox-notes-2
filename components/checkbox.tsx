@@ -4,6 +4,7 @@ interface CheckboxProps {
 }
 
 export default function Checkbox({ checked, onChange }: CheckboxProps) {
+  // TODO it would be cool with proper checkboxes that don't look like shit, and also has a good "focus" look.
   return (
     <>
       <button onClick={() => onChange(!checked)} className={checked ? 'checked' : ''}>
@@ -45,14 +46,8 @@ export default function Checkbox({ checked, onChange }: CheckboxProps) {
             cursor: pointer;
             border: none;
             background: none;
+            margin-left: 1px; // needed so entire outline is visible
             padding: 0px;
-            outline: none;
-          }
-          button:focus {
-            color: #129cd9;
-          }
-          button.checked:focus {
-            color: #7c90e6;
           }
         `}</style>
       </button>
