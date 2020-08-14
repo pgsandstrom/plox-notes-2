@@ -5,12 +5,14 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
+    'plugin:react/recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     // 'prettier' disables linting rules that conflict with prettier (this is dependency eslint-config-prettier)
     'prettier',
     'prettier/@typescript-eslint',
+    'prettier/react',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -23,7 +25,7 @@ module.exports = {
     },
     project: './tsconfig.json',
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'react-hooks'],
   rules: {
     // modify active rules:
 
@@ -49,6 +51,17 @@ module.exports = {
     '@typescript-eslint/no-extra-non-null-assertion': ['error'],
     '@typescript-eslint/no-unnecessary-condition': ['error'],
     '@typescript-eslint/strict-boolean-expressions': ['error'],
+
+    // frontend exclusive rules
+    'react/display-name': 'off', // Complains about functions in strings-file that returns jsx
+    'react/no-find-dom-node': 'off', // We need to do this with d3
+    'react/prop-types': 'off', // unnecessary with typescript
+    '@typescript-eslint/no-empty-interface': 'off', // I use this sometimes in the frontend, to have some uniformity between components
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'error',
+
+    // nextjs specific stuff:
+    'react/react-in-jsx-scope': 'off', // not needed in nextjs
   },
   settings: {
     react: {

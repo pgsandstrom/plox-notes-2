@@ -39,7 +39,7 @@ export default function Home() {
           <h1>Welcome to Bös</h1>
           <div className="intro-text">Minimalistic and simple checklist sharing.</div>
           <div className="intro-text">
-            Enter a hard to guess string below, like 'AlexCoolShoppingList2000' and click 'go'.
+            {"Enter a hard to guess string below, like 'AlexCoolShoppingList2000' and click 'go'."}
           </div>
           <div className="intro-text">
             Share the checklist by simply sending the URL to your friends. Secure? Not completely.

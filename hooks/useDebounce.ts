@@ -7,6 +7,8 @@ export function useDebounceObject(obj: unknown, callback: () => void, timeout: n
     return () => {
       clearTimeout(timer)
     }
+    // disable rule, since we explicitly want this to only change when obj change
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [obj])
 }
 

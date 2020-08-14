@@ -32,7 +32,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
         inputElement.focus()
         hasFocused()
       }
-    }, [focus])
+    }, [focus, hasFocused])
 
     // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
     // But resolve does not seem to be bundled with nextjs. Find a neat solution.

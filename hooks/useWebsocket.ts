@@ -17,6 +17,7 @@ export default function useWebsocket(
     // eslint-disable-next-line
     return {} as any
   }
+  /* eslint-disable react-hooks/rules-of-hooks */
 
   const socketRef = useRef<SocketIOClient.Socket>()
 

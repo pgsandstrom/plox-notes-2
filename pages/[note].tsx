@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'
 import { Note, NotePost } from 'types'
-import { useState, useRef, useReducer } from 'react'
+import { useState, useRef, useReducer, useCallback } from 'react'
 import useWebsocket from 'hooks/useWebsocket'
 import NoteRow from 'components/noteRow'
 import Button from 'components/button'
@@ -142,16 +142,6 @@ const NoteView = (props: NoteProps) => {
     },
   )
 
-  useDebounceObject(
-    noteState.lastUserAction,
-    () => {
-      if (noteState.lastUserAction > 0) {
-        saveThroughWebsocket()
-      }
-    },
-    0, // we don't debounce currently, so others viewing the document gets updated immediately.
-  )
-
   const setNotes = (notes: Note[]) => {
     dispatch({
       type: 'SET_NOTE_ACTION',
@@ -199,7 +189,7 @@ const NoteView = (props: NoteProps) => {
     })
   }
 
-  const hasFocused = () => (gainFocusRef.current = false)
+  const hasFocused = useCallback(() => (gainFocusRef.current = false), [])
 
   const saveThroughApi = async () => {
     setOngoingSaves((os) => os + 1)
@@ -223,10 +213,18 @@ const NoteView = (props: NoteProps) => {
   const websocketEmit = useWebsocket(noteId, setError, setNotes, websocketSaveComplete, onConnect)
 
   const saveThroughWebsocket = () => {
-    setOngoingSaves((os) => os + 1)
-    const notePost: NotePost = { id: noteId, notes: noteState.notes }
-    websocketEmit(WEBSOCKET_COMMAND.POST, notePost)
+    if (noteState.lastUserAction > 0) {
+      setOngoingSaves((os) => os + 1)
+      const notePost: NotePost = { id: noteId, notes: noteState.notes }
+      websocketEmit(WEBSOCKET_COMMAND.POST, notePost)
+    }
   }
+
+  useDebounceObject(
+    noteState.lastUserAction,
+    saveThroughWebsocket,
+    0, // we don't debounce currently, so others viewing the document gets updated immediately.
+  )
 
   return (
     <div style={{ display: 'flex', width: '100vw', maxWidth: '100%', height: '100%' }}>
