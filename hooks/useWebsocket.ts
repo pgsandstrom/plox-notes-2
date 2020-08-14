@@ -10,6 +10,7 @@ export default function useWebsocket(
   setError: (error?: string) => void,
   setNotes: (notes: Note[]) => void,
   saveComplete: () => void,
+  onConnect: () => void,
 ): (command: string, data: unknown) => void {
   // hax so websocket stuff is not ran on SSR
   if (typeof window === 'undefined') {
@@ -23,7 +24,7 @@ export default function useWebsocket(
     const socket = socketio(getServerUrl())
     socketRef.current = socket
     socket.on('connect', () => {
-      setError()
+      onConnect()
       socket.emit(WEBSOCKET_COMMAND.SET_ID, noteId)
     })
     socket.on('connect_error', () => {

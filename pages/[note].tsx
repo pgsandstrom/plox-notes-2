@@ -215,7 +215,12 @@ const NoteView = (props: NoteProps) => {
     setOngoingSaves((os) => os - 1)
   }
 
-  const websocketEmit = useWebsocket(noteId, setError, setNotes, websocketSaveComplete)
+  const onConnect = () => {
+    setError(undefined)
+    setOngoingSaves(0)
+  }
+
+  const websocketEmit = useWebsocket(noteId, setError, setNotes, websocketSaveComplete, onConnect)
 
   const saveThroughWebsocket = () => {
     setOngoingSaves((os) => os + 1)
