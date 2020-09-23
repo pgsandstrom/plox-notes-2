@@ -23,11 +23,11 @@ export const getServerSideProps: GetServerSideProps<NoteProps> = async (context)
   return { props: { notes: data.data } }
 }
 
-const newNote = (): Note => {
+const newNote = (checked: boolean): Note => {
   return {
     id: uuidv4(),
     text: '',
-    checked: false,
+    checked,
   }
 }
 
@@ -87,10 +87,14 @@ const NoteView = (props: NoteProps) => {
           lastUserAction: state.lastUserAction,
         }
       } else if (action.type === 'ADD_NOTE_ACTION') {
+        const checked =
+          state.notes.length > 0 && state.notes.length > action.index - 1
+            ? state.notes[action.index - 1].checked
+            : false
         return {
           notes: [
             ...state.notes.slice(0, action.index),
-            newNote(),
+            newNote(checked),
             ...state.notes.slice(action.index, state.notes.length),
           ],
           history: [state.notes, ...state.history],
