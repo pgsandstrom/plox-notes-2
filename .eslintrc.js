@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 module.exports = {
   env: {
     browser: true,
@@ -23,7 +24,7 @@ module.exports = {
       generators: false,
       experimentalObjectRestSpread: true,
     },
-    project: './tsconfig.json',
+    project: './tsconfig.eslint.json',
   },
   plugins: ['@typescript-eslint', 'react-hooks'],
   rules: {
@@ -40,7 +41,6 @@ module.exports = {
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/camelcase': 'off', // There are a few exceptions, like variables from the backend and stuff
-    '@typescript-eslint/no-empty-interface': 'off', // I use empty interfaces sometimes in the frontend, to have some uniformity between components
     '@typescript-eslint/explicit-module-boundary-types': 'off', // This feels unnecessary and verbose
     '@typescript-eslint/no-unused-vars': 'off', // currently not working correctly
 

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "next build && tsc --project tsconfig.server.json",
-    "format": "prettier --write \"{,!(.next|node_modules)}/**/*.{json,md,ts,tsx,css,scss}\"",
+    "format": "prettier --write \"{,!(.next|dist|node_modules)/**/}!(package-lock).{json,md,js,jsx,ts,tsx,css,scss}\"",
     "lint": "node ./node_modules/eslint/bin/eslint.js --ext .ts --ext .tsx --fix .",
     "pre-commit": "lint-staged",
     "pre-push": "npm run lint && npm run typecheck",
@@ -57,7 +57,7 @@
     "*.{json,md,css,scss}": [
       "prettier --write"
     ],
-    "*.{ts,tsx}": [
+    "*.{js,jsx,ts,tsx}": [
       "node ./node_modules/eslint/bin/eslint.js --ext .ts --ext .tsx --fix",
       "prettier --write"
     ]
