@@ -55,8 +55,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
             }
           }}
           onKeyDown={(e) => {
-            if (e.keyCode === 8 && note.text === '') {
-              // backspace
+            if (e.key === 'Backspace' && note.text === '') {
               e.preventDefault()
               deleteNote(index)
             }
