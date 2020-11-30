@@ -48,14 +48,11 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
           className="note-row-input"
           value={note.text}
           onChange={(e) => editNote({ ...note, text: e.target.value }, index)}
-          onKeyPress={(e) => {
+          onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault()
               addNote(index + 1)
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Backspace' && note.text === '') {
+            } else if (e.key === 'Backspace' && note.text === '') {
               e.preventDefault()
               deleteNote(index)
             }
