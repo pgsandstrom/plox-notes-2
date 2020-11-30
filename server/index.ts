@@ -1,7 +1,7 @@
 import { createServer } from 'http'
 import { parse } from 'url'
 import next from 'next'
-import socketio from 'socket.io'
+import { Server } from 'socket.io'
 import websocket from './websocket'
 
 const dev = process.env.NODE_ENV !== 'production'
@@ -16,8 +16,8 @@ app
       handle(req, res, parsedUrl).catch(() => console.error('failed to handle request'))
     })
 
-    const io = socketio.listen(server)
-    websocket(io)
+    const ioServer = new Server(server)
+    websocket(ioServer)
 
     // There seem to be something weird with loading .env.local in next.js.
     // It seems to be undefined before next.js server is initiated?

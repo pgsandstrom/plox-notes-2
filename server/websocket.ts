@@ -11,6 +11,9 @@ interface NoteConnection {
 
 const activeSockets: PartialDict<string, NoteConnection> = {}
 
+// typing sucks with the websockets, so we disable these rules...
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
+
 export default (io: socketio.Server) => {
   // TODO really using the rest interface to update data should trigger all websockets to send out new data... but you know...
   io.sockets.on('connection', (socket) => {
