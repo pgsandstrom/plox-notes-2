@@ -68,7 +68,7 @@ type NoteAction = SetNoteAction | AddNoteAction | DeleteNoteAction | EditNoteAct
 
 export interface FocusGain {
   index: number
-  position: 'start' | 'end'
+  position: 'start' | 'end' | number
 }
 
 const NoteView = (props: NoteProps) => {
@@ -212,6 +212,13 @@ const NoteView = (props: NoteProps) => {
     })
   }
 
+  const setSpecificFocus = (index: number, char: number) => {
+    gainFocusRef.current = {
+      index: index,
+      position: char,
+    }
+  }
+
   const undo = () => {
     dispatch({
       type: 'UNDO_ACTION',
@@ -293,6 +300,7 @@ const NoteView = (props: NoteProps) => {
               disabled={error !== undefined}
               editNote={editNote}
               deleteNote={deleteNote}
+              setSpecificFocus={setSpecificFocus}
             />
           ))}
         </FlipMove>

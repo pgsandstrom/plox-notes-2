@@ -14,11 +14,21 @@ interface NoteRowProps {
   disabled: boolean
   editNote: (note: Note, index: number) => void
   deleteNote: (index: number) => void
+  setSpecificFocus: (index: number, char: number) => void
 }
 
 const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
   (
-    { note, previousNote, index, gainFocusRef, disabled, editNote, deleteNote }: NoteRowProps,
+    {
+      note,
+      previousNote,
+      index,
+      gainFocusRef,
+      disabled,
+      editNote,
+      deleteNote,
+      setSpecificFocus,
+    }: NoteRowProps,
     ref,
   ) => {
     const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -28,7 +38,12 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
       const inputElement = inputRef.current
       if (gainFocus.index === index && inputElement) {
         const inputLength = inputElement.value.length
-        const selectionPosition = gainFocus.position === 'end' ? inputLength : 0
+        const selectionPosition: number =
+          gainFocus.position === 'end'
+            ? inputLength
+            : gainFocus.position === 'start'
+            ? 0
+            : gainFocus.position
         inputElement.selectionStart = selectionPosition
         inputElement.selectionEnd = selectionPosition
         inputElement.focus()
@@ -68,6 +83,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
                   },
                   index - 1,
                 )
+                setSpecificFocus(index - 1, previousNote.text.length)
               }
             }
           }}
