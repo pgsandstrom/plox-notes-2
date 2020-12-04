@@ -33,6 +33,9 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
   ) => {
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
+    // Currently when deleting a row with keyboard presses on mobile the keyboard flickers.
+    // I have tried moving focus gaining to before deleting rows, but it results in weird bugs on mobile.
+    // Since debugging stuff like that is super frustrating on mobile, I have given up on fixing this.
     const gainFocus = gainFocusRef.current
     useEffect(() => {
       const inputElement = inputRef.current
