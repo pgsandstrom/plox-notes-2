@@ -12,15 +12,11 @@ interface NoteRowProps {
   hasFocused: () => void
   disabled: boolean
   editNote: (note: Note, index: number) => void
-  addNote: (index: number) => void
   deleteNote: (index: number) => void
 }
 
 const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
-  (
-    { note, index, focus, hasFocused, disabled, editNote, addNote, deleteNote }: NoteRowProps,
-    ref,
-  ) => {
+  ({ note, index, focus, hasFocused, disabled, editNote, deleteNote }: NoteRowProps, ref) => {
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
@@ -51,22 +47,11 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
             editNote({ ...note, text: e.target.value }, index)
           }}
           onKeyDown={(e) => {
-            // if (e.key === 'Enter') {
-            //   e.preventDefault()
-            //   addNote(index + 1)
-            // } else
             if (e.key === 'Backspace' && note.text === '') {
               e.preventDefault()
               deleteNote(index)
             }
-          }}
-          onKeyUp={(_e) => {
-            // this is a backup since onKeyDown is buggy on mobile. For example see https://bugs.chromium.org/p/chromium/issues/detail?id=118639
-            // TODO detect when newline is somewhere else and split accordingly.
-            if (note.text.endsWith('\n')) {
-              editNote({ ...note, text: note.text.substring(0, note.text.length - 1) }, index)
-              addNote(index + 1)
-            }
+            // TODO check if we press backspace and are at the start. Then merge notes!!!
           }}
           disabled={disabled}
           ref={inputRef}

@@ -23,10 +23,10 @@ export const getServerSideProps: GetServerSideProps<NoteProps> = async (context)
   return { props: { notes: data.data } }
 }
 
-const newNote = (checked: boolean): Note => {
+const newNote = (checked: boolean, text?: string): Note => {
   return {
     id: uuidv4(),
-    text: '',
+    text: text ?? '',
     checked,
   }
 }
@@ -45,6 +45,8 @@ interface SetNoteAction {
 interface AddNoteAction {
   type: 'ADD_NOTE_ACTION'
   index: number
+  text?: string
+  checked?: boolean
 }
 
 interface DeleteNoteAction {
@@ -87,14 +89,20 @@ const NoteView = (props: NoteProps) => {
           lastUserAction: state.lastUserAction,
         }
       } else if (action.type === 'ADD_NOTE_ACTION') {
-        const checked =
-          state.notes.length > 0 && state.notes.length > action.index - 1
-            ? state.notes[action.index - 1].checked
-            : false
+        let checked
+        // TODO move this logic
+        if (action.checked !== undefined) {
+          checked = action.checked
+        } else {
+          checked =
+            state.notes.length > 0 && state.notes.length > action.index - 1
+              ? state.notes[action.index - 1].checked
+              : false
+        }
         return {
           notes: [
             ...state.notes.slice(0, action.index),
-            newNote(checked),
+            newNote(checked, action.text),
             ...state.notes.slice(action.index, state.notes.length),
           ],
           history: [state.notes, ...state.history],
@@ -125,7 +133,7 @@ const NoteView = (props: NoteProps) => {
           history: [state.notes, ...state.history],
           lastUserAction: new Date().getTime(),
         }
-        //eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       } else if (action.type === 'UNDO_ACTION') {
         if (state.history.length === 0) {
           return state
@@ -153,10 +161,12 @@ const NoteView = (props: NoteProps) => {
     })
   }
 
-  const addNote = (index: number) => {
+  const addNote = (index: number, text?: string, checked?: boolean) => {
     dispatch({
       type: 'ADD_NOTE_ACTION',
       index,
+      text,
+      checked,
     })
     setFocusIndex(index)
     gainFocusRef.current = true
@@ -180,6 +190,11 @@ const NoteView = (props: NoteProps) => {
   }
 
   const editNote = (note: Note, index: number) => {
+    if (note.text.includes('\n')) {
+      const [original, newText] = note.text.split('\n')
+      note.text = original
+      addNote(index + 1, newText, note.checked)
+    }
     dispatch({
       type: 'EDIT_NOTE_ACTION',
       note,
@@ -269,7 +284,6 @@ const NoteView = (props: NoteProps) => {
               hasFocused={hasFocused}
               disabled={error !== undefined}
               editNote={editNote}
-              addNote={addNote}
               deleteNote={deleteNote}
             />
           ))}
