@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'
 import { Note, NotePost } from 'types'
-import { useState, useRef, useReducer, useCallback } from 'react'
+import { useState, useRef, useReducer } from 'react'
 import useWebsocket from 'hooks/useWebsocket'
 import NoteRow from 'components/noteRow'
 import Button from 'components/button'
@@ -66,6 +66,11 @@ interface UndoAction {
 
 type NoteAction = SetNoteAction | AddNoteAction | DeleteNoteAction | EditNoteAction | UndoAction
 
+export interface FocusGain {
+  index: number
+  position: 'start' | 'end'
+}
+
 const NoteView = (props: NoteProps) => {
   const router = useRouter()
   const noteId = router.query.note as string
@@ -73,8 +78,10 @@ const NoteView = (props: NoteProps) => {
   const [ongoingSaves, setOngoingSaves] = useState(0)
 
   const [error, setError] = useState<string>()
-  const [focusIndex, setFocusIndex] = useState<number>(props.notes.length - 1)
-  const gainFocusRef = useRef<boolean>(true)
+  const gainFocusRef = useRef<FocusGain>({
+    index: props.notes.length - 1,
+    position: 'end',
+  })
 
   const isNotesEmpty = (notes: Note[]): boolean => {
     return notes.length === 1 && notes[0].text === ''
@@ -90,7 +97,6 @@ const NoteView = (props: NoteProps) => {
         }
       } else if (action.type === 'ADD_NOTE_ACTION') {
         let checked
-        // TODO move this logic
         if (action.checked !== undefined) {
           checked = action.checked
         } else {
@@ -168,8 +174,10 @@ const NoteView = (props: NoteProps) => {
       text,
       checked,
     })
-    setFocusIndex(index)
-    gainFocusRef.current = true
+    gainFocusRef.current = {
+      index,
+      position: 'start',
+    }
   }
 
   const deleteNote = (index: number) => {
@@ -184,8 +192,10 @@ const NoteView = (props: NoteProps) => {
       document.activeElement &&
       document.activeElement.className.includes('note-row-input')
     ) {
-      setFocusIndex(index - 1)
-      gainFocusRef.current = true
+      gainFocusRef.current = {
+        index: index - 1,
+        position: 'end',
+      }
     }
   }
 
@@ -207,8 +217,6 @@ const NoteView = (props: NoteProps) => {
       type: 'UNDO_ACTION',
     })
   }
-
-  const hasFocused = useCallback(() => (gainFocusRef.current = false), [])
 
   const saveThroughApi = async () => {
     setOngoingSaves((os) => os + 1)
@@ -278,10 +286,10 @@ const NoteView = (props: NoteProps) => {
           {noteState.notes.map((note, index) => (
             <NoteRow
               key={note.id}
+              previousNote={noteState.notes[index - 1]}
               note={note}
               index={index}
-              focus={index === focusIndex && gainFocusRef.current === true}
-              hasFocused={hasFocused}
+              gainFocusRef={gainFocusRef}
               disabled={error !== undefined}
               editNote={editNote}
               deleteNote={deleteNote}

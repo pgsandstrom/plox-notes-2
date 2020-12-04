@@ -1,34 +1,39 @@
 import { Note } from 'types'
 import TextareaAutosize from 'react-textarea-autosize'
-import { useRef, useEffect, forwardRef } from 'react'
+import { useRef, useEffect, forwardRef, MutableRefObject } from 'react'
 import Checkbox from './checkbox'
 import Button from './button'
 import { Cross } from './icons'
+import { FocusGain } from 'pages/[note]'
 
 interface NoteRowProps {
+  previousNote?: Note
   note: Note
   index: number
-  focus: boolean
-  hasFocused: () => void
+  gainFocusRef: MutableRefObject<FocusGain>
   disabled: boolean
   editNote: (note: Note, index: number) => void
   deleteNote: (index: number) => void
 }
 
 const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
-  ({ note, index, focus, hasFocused, disabled, editNote, deleteNote }: NoteRowProps, ref) => {
+  (
+    { note, previousNote, index, gainFocusRef, disabled, editNote, deleteNote }: NoteRowProps,
+    ref,
+  ) => {
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
+    const gainFocus = gainFocusRef.current
     useEffect(() => {
       const inputElement = inputRef.current
-      if (focus && inputElement) {
+      if (gainFocus.index === index && inputElement) {
         const inputLength = inputElement.value.length
-        inputElement.selectionStart = inputLength
-        inputElement.selectionEnd = inputLength
+        const selectionPosition = gainFocus.position === 'end' ? inputLength : 0
+        inputElement.selectionStart = selectionPosition
+        inputElement.selectionEnd = selectionPosition
         inputElement.focus()
-        hasFocused()
       }
-    }, [focus, hasFocused])
+    }, [index, gainFocus])
 
     // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
     // But resolve does not seem to be bundled with nextjs. Find a neat solution.
@@ -47,11 +52,24 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
             editNote({ ...note, text: e.target.value }, index)
           }}
           onKeyDown={(e) => {
-            if (e.key === 'Backspace' && note.text === '') {
+            const inputElement = inputRef.current
+            if (
+              e.key === 'Backspace' &&
+              inputElement?.selectionStart === 0 &&
+              inputElement.selectionEnd === 0
+            ) {
               e.preventDefault()
               deleteNote(index)
+              if (previousNote) {
+                editNote(
+                  {
+                    ...previousNote,
+                    text: `${previousNote.text}${note.text}`,
+                  },
+                  index - 1,
+                )
+              }
             }
-            // TODO check if we press backspace and are at the start. Then merge notes!!!
           }}
           disabled={disabled}
           ref={inputRef}
