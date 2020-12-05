@@ -289,7 +289,11 @@ const NoteView = (props: NoteProps) => {
           </div>
         )}
         <div style={{ fontSize: '2em', textAlign: 'center', margin: '10px 0' }}>{noteId}</div>
-        <FlipMove duration={200} style={{ flex: '1 0 0', overflowY: 'auto' }} disableAllAnimations>
+        <FlipMove
+          duration={200}
+          style={{ flex: '1 0 0', overflowY: 'auto' }}
+          leaveAnimation={false}
+        >
           {noteState.notes.map((note, index) => (
             <NoteRow
               key={note.id}
