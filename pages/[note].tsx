@@ -78,7 +78,7 @@ const NoteView = (props: NoteProps) => {
   const [ongoingSaves, setOngoingSaves] = useState(0)
 
   const [error, setError] = useState<string>()
-  const gainFocusRef = useRef<FocusGain>({
+  const gainFocusRef = useRef<FocusGain | undefined>({
     index: props.notes.length - 1,
     position: 'end',
   })

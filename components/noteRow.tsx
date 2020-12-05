@@ -10,7 +10,7 @@ interface NoteRowProps {
   previousNote?: Note
   note: Note
   index: number
-  gainFocusRef: MutableRefObject<FocusGain>
+  gainFocusRef: MutableRefObject<FocusGain | undefined>
   disabled: boolean
   editNote: (note: Note, index: number) => void
   deleteNote: (index: number) => void
@@ -39,7 +39,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
     const gainFocus = gainFocusRef.current
     useEffect(() => {
       const inputElement = inputRef.current
-      if (gainFocus.index === index && inputElement) {
+      if (gainFocus?.index === index && inputElement) {
         const inputLength = inputElement.value.length
         const selectionPosition: number =
           gainFocus.position === 'end'
@@ -50,8 +50,9 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
         inputElement.selectionStart = selectionPosition
         inputElement.selectionEnd = selectionPosition
         inputElement.focus()
+        gainFocusRef.current = undefined
       }
-    }, [index, gainFocus])
+    }, [index, gainFocus, gainFocusRef])
 
     // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
     // But resolve does not seem to be bundled with nextjs. Find a neat solution.
