@@ -10,10 +10,7 @@ module.exports = {
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
-    // 'prettier' disables linting rules that conflict with prettier (this is dependency eslint-config-prettier)
     'prettier',
-    'prettier/@typescript-eslint',
-    'prettier/react',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -24,7 +21,7 @@ module.exports = {
       generators: false,
       experimentalObjectRestSpread: true,
     },
-    project: './tsconfig.eslint.json',
+    project: './tsconfig.json',
   },
   plugins: ['@typescript-eslint', 'react-hooks'],
   rules: {
