@@ -1,7 +1,7 @@
 // import { save, load } from './controller/note';
 import socketio from 'socket.io'
 import { PartialDict, NotePost } from 'types'
-import { load, save } from './noteController'
+import { loadNote, saveNote } from './noteController'
 import { WEBSOCKET_COMMAND } from './websocketConstants'
 
 interface NoteConnection {
@@ -26,7 +26,7 @@ export default (io: socketio.Server) => {
       // When client clarifies who they are, send out the data to them!
       // Is this really necessary? Only matters if data updated between page load and websocket connection
       // Maybe remove this...
-      load(noteId)
+      loadNote(noteId)
         .then((notes) => {
           if (notes) {
             const noteData: NotePost = { id: noteId, notes: notes.data }
@@ -41,7 +41,7 @@ export default (io: socketio.Server) => {
     })
     socket.on(WEBSOCKET_COMMAND.POST, (data: NotePost) => {
       const { id, notes } = data
-      save(id, notes)
+      saveNote(id, notes)
         .then(() => {
           Object.keys(activeSockets)
             .filter((socketId) => socketId !== socket.id) // Remove own socket

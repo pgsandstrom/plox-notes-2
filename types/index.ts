@@ -16,3 +16,13 @@ export interface NotePost {
   id: string
   notes: Note[]
 }
+
+export interface NoteMeta {
+  id: string
+  text: string
+}
+
+export interface NoteMetaPost {
+  id: string
+  metaList: NoteMeta[]
+}

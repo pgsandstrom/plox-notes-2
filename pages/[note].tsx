@@ -9,7 +9,7 @@ import useWebsocket from 'hooks/useWebsocket'
 import NoteRow from 'components/noteRow'
 import Button from 'components/button'
 import { useDebounceObject } from 'hooks/useDebounce'
-import { loadOrShowNew } from 'server/noteController'
+import { loadOrShowNewNote } from 'server/noteController'
 import getServerUrl from 'server/util/serverUrl'
 import { LoadIcon, Check } from 'components/icons'
 import { WEBSOCKET_COMMAND } from 'server/websocketConstants'
@@ -19,7 +19,7 @@ interface NoteProps {
 }
 
 export const getServerSideProps: GetServerSideProps<NoteProps> = async (context) => {
-  const data = await loadOrShowNew(context.params!.note as string)
+  const data = await loadOrShowNewNote(context.params!.note as string)
   return { props: { notes: data.data } }
 }
 
@@ -227,7 +227,7 @@ const NoteView = (props: NoteProps) => {
 
   const saveThroughApi = async () => {
     setOngoingSaves((os) => os + 1)
-    await fetch(`${getServerUrl()}/api/${noteId}/save`, {
+    await fetch(`${getServerUrl()}/api/note/${noteId}/save`, {
       method: 'POST',
       body: JSON.stringify(noteState.notes),
       credentials: 'same-origin',
