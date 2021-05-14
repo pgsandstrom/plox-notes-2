@@ -64,7 +64,7 @@ const NoteMetaRow = forwardRef<HTMLDivElement, NoteRowProps>(
       // TODO centering all of these more could be nice. Maybe just move this to its own component.
       return (
         <>
-          <div className="note-row" style={{ marginBottom: '20px' }}>
+          <div className="note-row" style={{ marginBottom: '20px', marginLeft: '20px' }}>
             <Link href={`/${note.text}`}>{note.text}</Link>
           </div>
           {getStyle()}
