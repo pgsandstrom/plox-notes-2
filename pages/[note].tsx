@@ -83,8 +83,14 @@ const NoteView = (props: NoteProps) => {
     position: 'end',
   })
 
-  const isNotesEmpty = (notes: Note[]): boolean => {
-    return notes.length === 1 && notes[0].text === ''
+  const isNotesIdentical = (notes1: Note[], notes2: Note[]) => {
+    if (notes1.length !== notes2.length) {
+      return false
+    }
+    return notes1.every((note, index) => {
+      const otherNote = notes2[index]
+      return note.checked === otherNote.checked && note.text === otherNote.text
+    })
   }
 
   const [noteState, dispatch] = useReducer(
@@ -92,7 +98,9 @@ const NoteView = (props: NoteProps) => {
       if (action.type === 'SET_NOTE_ACTION') {
         return {
           notes: action.notes,
-          history: isNotesEmpty(state.notes) ? [...state.history] : [state.notes, ...state.history],
+          history: isNotesIdentical(state.notes, action.notes)
+            ? [...state.history]
+            : [state.notes, ...state.history],
           lastUserAction: state.lastUserAction,
         }
       } else if (action.type === 'ADD_NOTE_ACTION') {
@@ -315,7 +323,11 @@ const NoteView = (props: NoteProps) => {
           >
             Add
           </Button>
-          <Button style={{ flex: '1 0 0', height: '50px' }} onClick={undo}>
+          <Button
+            style={{ flex: '1 0 0', height: '50px' }}
+            onClick={undo}
+            disabled={noteState.history.length === 0}
+          >
             Undo
           </Button>
           <Button style={{ flex: '1 0 0', height: '50px' }} onClick={saveThroughApi}>

@@ -43,9 +43,6 @@ export default function useWebsocket(
     socket.on('ok', () => {
       saveComplete()
     })
-    socket.on('connect_error', () => {
-      setError('Connect error 2')
-    })
     socket.on('disconnect', () => {
       setError('Disconnected')
     })

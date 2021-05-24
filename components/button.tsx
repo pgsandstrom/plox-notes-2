@@ -16,6 +16,10 @@ const Button = (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
         button:focus {
           background: #129cd9;
         }
+
+        button:disabled {
+          background: #6666666e;
+        }
       `}</style>
     </>
   )
