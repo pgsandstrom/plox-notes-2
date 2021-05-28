@@ -320,17 +320,22 @@ const NoteView = (props: NoteProps) => {
           <Button
             style={{ flex: '1 0 0', height: '50px' }}
             onClick={() => addNote(noteState.notes.length)}
+            disabled={error !== undefined}
           >
             Add
           </Button>
           <Button
             style={{ flex: '1 0 0', height: '50px' }}
             onClick={undo}
-            disabled={noteState.history.length === 0}
+            disabled={noteState.history.length === 0 || error !== undefined}
           >
             Undo
           </Button>
-          <Button style={{ flex: '1 0 0', height: '50px' }} onClick={saveThroughApi}>
+          <Button
+            style={{ flex: '1 0 0', height: '50px' }}
+            onClick={saveThroughApi}
+            disabled={error !== undefined}
+          >
             <span style={{ paddingRight: '5px' }}>Save</span>
             {ongoingSaves > 0 && <LoadIcon style={{ width: '16px' }} />}
             {ongoingSaves === 0 && <Check style={{ width: '16px' }} />}
