@@ -1,6 +1,6 @@
-import { Pool, PoolClient, QueryConfig, QueryResult, types } from 'pg'
+import { Pool, PoolClient, QueryConfig, QueryResult, QueryResultRow, types } from 'pg'
 
-// TODO null returning instead of undefined from database might screw us. Can we transform all null to undefined?
+// warning: null returning instead of undefined from database might screw us. Can we transform all null to undefined?
 
 // Force count-function in database to return number instead of string
 // https://github.com/brianc/node-pg-types#use
@@ -11,7 +11,6 @@ types.setTypeParser(20, (val: string) => {
 let dbPool: Pool | undefined
 const getDbPool = () => {
   if (dbPool === undefined) {
-    console.log('creating pool')
     dbPool = new Pool({
       host: process.env.DB_HOST,
       database: process.env.DB_DATABASE,
@@ -23,26 +22,31 @@ const getDbPool = () => {
 }
 
 // Use this for single query
-export const query = (stuff: QueryConfig) => getDbPool().query(stuff)
-export const queryString = (stuff: string, values?: any[]) => getDbPool().query(stuff, values)
+export const query = <T extends QueryResultRow = any>(stuff: QueryConfig) =>
+  getDbPool().query<T>(stuff)
+export const queryString = <T extends QueryResultRow = any>(stuff: string, values?: any[]) =>
+  getDbPool().query<T>(stuff, values)
 
-export const querySingle = async <T = any>(stuff: QueryConfig) => {
+export const querySingle = async <T extends QueryResultRow = any>(stuff: QueryConfig) => {
   const result: QueryResult = await getDbPool().query(stuff)
   return getSingle<T>(result)
 }
 
-export const querySingleString = async <T = any>(stuff: string, values?: any[]) => {
-  const result: QueryResult = await getDbPool().query(stuff, values)
+export const querySingleString = async <T extends QueryResultRow = any>(
+  stuff: string,
+  values?: any[],
+) => {
+  const result: QueryResult = await getDbPool().query<T>(stuff, values)
   return getSingle<T>(result)
 }
 
-const getSingle = <T>(result: QueryResult): T | undefined => {
+const getSingle = <T extends QueryResultRow>(result: QueryResult<T>): T | undefined => {
   if (result.rowCount > 1) {
     throw new Error(`Unexpected number of rows: ${result.rowCount}`)
   } else if (result.rowCount === 0) {
     return undefined
   } else {
-    return result.rows[0] as T
+    return result.rows[0]
   }
 }
 
