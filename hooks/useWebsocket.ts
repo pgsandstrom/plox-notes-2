@@ -1,4 +1,4 @@
-import socketio from 'socket.io-client'
+import socketio, { Socket } from 'socket.io-client'
 import { useRef } from 'react'
 import { Note, NotePost } from 'types'
 import getServerUrl from 'server/util/serverUrl'
@@ -19,10 +19,10 @@ export default function useWebsocket(
   }
   /* eslint-disable react-hooks/rules-of-hooks */
 
-  const socketRef = useRef<SocketIOClient.Socket>()
+  const socketRef = useRef<Socket>()
 
   if (socketRef.current === undefined) {
-    const socket = socketio(getServerUrl())
+    const socket: Socket = socketio(getServerUrl())
     socketRef.current = socket
     socket.on('connect', () => {
       onConnect()
