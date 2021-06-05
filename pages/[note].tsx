@@ -104,15 +104,7 @@ const NoteView = (props: NoteProps) => {
           lastUserAction: state.lastUserAction,
         }
       } else if (action.type === 'ADD_NOTE_ACTION') {
-        let checked
-        if (action.checked !== undefined) {
-          checked = action.checked
-        } else {
-          checked =
-            state.notes.length > 0 && state.notes.length > action.index - 1
-              ? state.notes[action.index - 1].checked
-              : false
-        }
+        const checked = action.checked ?? false
         return {
           notes: [
             ...state.notes.slice(0, action.index),
@@ -211,7 +203,9 @@ const NoteView = (props: NoteProps) => {
     if (note.text.includes('\n')) {
       const [original, newText] = note.text.split('\n')
       note.text = original
-      addNote(index + 1, newText, note.checked)
+      const isLastCheckedNote =
+        noteState.notes.length - 1 === index || noteState.notes[index + 1].checked === false
+      addNote(index + 1, newText, isLastCheckedNote ? false : note.checked)
     }
     dispatch({
       type: 'EDIT_NOTE_ACTION',
