@@ -56,9 +56,15 @@ export default function Home() {
             }}
             disabled={isRouting}
           />
-          <button onClick={goToPage} disabled={isRouting}>
+          <button onClick={goToPage} disabled={isRouting} style={{ marginTop: '10px' }}>
             Go
           </button>
+
+          <div style={{ marginTop: '20px', display: 'inline', whiteSpace: 'break-spaces' }}>
+            If you are a real bös power user you can also create a list of list by adding
+            &apos;meta&apos; to the start of the url, like{'\n'}
+            <a href="/meta/my-meta-list">https://bös.se/meta/my-meta-list</a>
+          </div>
         </main>
 
         <footer
