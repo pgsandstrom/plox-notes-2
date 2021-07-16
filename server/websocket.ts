@@ -29,7 +29,7 @@ export default (io: socketio.Server) => {
       loadNote(noteId)
         .then((notes) => {
           if (notes) {
-            const noteData: NotePost = { id: noteId, notes: notes.data }
+            const noteData: NotePost = { id: noteId, notes }
             socket.emit(WEBSOCKET_COMMAND.LOAD, noteData)
           }
         })

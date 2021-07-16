@@ -1,29 +1,41 @@
 import { querySingle, SQL, query } from './util/db'
-import { Note } from 'types'
+import { Note, NoteDb } from 'types'
 import { v4 as uuidv4 } from 'uuid'
 
-export const loadOrShowNewNote = async (id: string) => {
+export const loadOrShowNewNote = async (id: string): Promise<Note[]> => {
   const queryResult = await loadNote(id)
   if (queryResult) {
     return queryResult
   } else {
-    return {
-      data: [
-        {
-          id: uuidv4(),
-          text: '',
-          checked: false,
-        },
-      ],
-    }
+    return [
+      {
+        id: uuidv4(),
+        text: '',
+        checked: false,
+        indentation: 0,
+      },
+    ]
   }
 }
 
-export const loadNote = async (id: string) => {
-  const queryResult = await querySingle<{ data: Note[] }>(
+export const loadNote = async (id: string): Promise<Note[] | undefined> => {
+  const queryResult = await querySingle<{ data: NoteDb[] }>(
     SQL`SELECT data FROM note WHERE id = ${id}`,
   )
-  return queryResult
+  if (queryResult?.data) {
+    return noteDbToNote(queryResult.data)
+  } else {
+    return undefined
+  }
+}
+
+const noteDbToNote = (data: NoteDb[]): Note[] => {
+  return data.map((note) => {
+    return {
+      ...note,
+      indentation: note.indentation ?? 0,
+    }
+  })
 }
 
 export const saveNote = async (id: string, notes: Note[]) => {

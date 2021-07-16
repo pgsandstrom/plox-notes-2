@@ -19,8 +19,8 @@ interface NoteProps {
 }
 
 export const getServerSideProps: GetServerSideProps<NoteProps> = async (context) => {
-  const data = await loadOrShowNewNote(context.params!.note as string)
-  return { props: { notes: data.data } }
+  const notes = await loadOrShowNewNote(context.params!.note as string)
+  return { props: { notes } }
 }
 
 const newNote = (checked: boolean, text?: string): Note => {
@@ -28,6 +28,7 @@ const newNote = (checked: boolean, text?: string): Note => {
     id: uuidv4(),
     text: text ?? '',
     checked,
+    indentation: 0,
   }
 }
 
