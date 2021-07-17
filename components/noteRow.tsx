@@ -8,6 +8,7 @@ import { FocusGain } from 'pages/[note]'
 import useKey from 'hooks/useKey'
 
 const SWIPE_INDENTATION_LIMIT = 30
+const SWIPE_MAX_Y_DIFF = 25
 
 interface NoteRowProps {
   previousNote?: Note
@@ -38,7 +39,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
   ) => {
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
-    const startTouchRef = useRef<number>(0)
+    const startTouchRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
 
     // Currently when deleting a row with keyboard presses on mobile the keyboard flickers.
     // I have tried moving focus gaining to before deleting rows, but it results in weird bugs on mobile.
@@ -141,14 +142,24 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
             if (e.changedTouches.length === 0) {
               return
             }
-            startTouchRef.current = e.changedTouches[0].clientX
+            startTouchRef.current = {
+              x: e.changedTouches[0].clientX,
+              y: e.changedTouches[0].clientY,
+            }
           }}
           onTouchEnd={(e) => {
             if (e.changedTouches.length === 0) {
               return
             }
-            const startX = startTouchRef.current
+            const startX = startTouchRef.current.x
+            const startY = startTouchRef.current.y
             const endX = e.changedTouches[0].clientX
+            const endY = e.changedTouches[0].clientY
+
+            if (Math.abs(endY - startY) > SWIPE_MAX_Y_DIFF) {
+              return
+            }
+
             if (endX - startX > SWIPE_INDENTATION_LIMIT) {
               increaseIndentation()
             } else if (endX - startX < -SWIPE_INDENTATION_LIMIT) {
