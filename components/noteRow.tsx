@@ -7,6 +7,8 @@ import { Cross } from './icons'
 import { FocusGain } from 'pages/[note]'
 import useKey from 'hooks/useKey'
 
+const SWIPE_INDENTATION_LIMIT = 30
+
 interface NoteRowProps {
   previousNote?: Note
   note: Note
@@ -36,6 +38,8 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
   ) => {
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
+    const startTouchRef = useRef<number>(0)
+
     // Currently when deleting a row with keyboard presses on mobile the keyboard flickers.
     // I have tried moving focus gaining to before deleting rows, but it results in weird bugs on mobile.
     // Since debugging stuff like that is super frustrating on mobile, I have given up on fixing this.
@@ -57,6 +61,18 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
       }
     }, [index, gainFocus, gainFocusRef])
 
+    const increaseIndentation = () => {
+      if (note.indentation < 3) {
+        setIndentation(index, note.indentation + 1)
+      }
+    }
+
+    const decreaseIndentation = () => {
+      if (note.indentation > 0) {
+        setIndentation(index, note.indentation - 1)
+      }
+    }
+
     // TODO it would be nicer to have one root useKey instead of one per row like this, but it would require some hax
     useKey(
       (key) => {
@@ -64,13 +80,9 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
           return
         }
         if (key === 'h' || key === 'ArrowLeft') {
-          if (note.indentation > 0) {
-            setIndentation(index, note.indentation - 1)
-          }
+          decreaseIndentation()
         } else {
-          if (note.indentation < 3) {
-            setIndentation(index, note.indentation + 1)
-          }
+          increaseIndentation()
         }
       },
       ['ArrowRight', 'h', 'ArrowLeft', 'l'],
@@ -89,7 +101,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
         ref={ref}
         className={`note-row ${note.checked && 'checked'}`}
         style={{
-          marginLeft: note.indentation * 10,
+          marginLeft: note.indentation * 15,
         }}
       >
         <Checkbox
@@ -125,6 +137,24 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
               }
             }
           }}
+          onTouchStart={(e) => {
+            if (e.changedTouches.length === 0) {
+              return
+            }
+            startTouchRef.current = e.changedTouches[0].clientX
+          }}
+          onTouchEnd={(e) => {
+            if (e.changedTouches.length === 0) {
+              return
+            }
+            const startX = startTouchRef.current
+            const endX = e.changedTouches[0].clientX
+            if (endX - startX > SWIPE_INDENTATION_LIMIT) {
+              increaseIndentation()
+            } else if (endX - startX < -SWIPE_INDENTATION_LIMIT) {
+              decreaseIndentation()
+            }
+          }}
           disabled={disabled}
           ref={inputRef}
         />
@@ -136,6 +166,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
             display: flex;
             align-items: center;
             margin: 6px 0;
+            transition: margin 100ms ease-in-out;
           }
 
           .note-row-input {
