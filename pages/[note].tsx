@@ -65,7 +65,19 @@ interface UndoAction {
   type: 'UNDO_ACTION'
 }
 
-type NoteAction = SetNoteAction | AddNoteAction | DeleteNoteAction | EditNoteAction | UndoAction
+interface SetIndentationAction {
+  type: 'INDENTATION_ACTION'
+  indentation: number
+  index: number
+}
+
+type NoteAction =
+  | SetNoteAction
+  | AddNoteAction
+  | DeleteNoteAction
+  | EditNoteAction
+  | UndoAction
+  | SetIndentationAction
 
 export interface FocusGain {
   index: number
@@ -140,7 +152,6 @@ const NoteView = (props: NoteProps) => {
           history: [state.notes, ...state.history],
           lastUserAction: new Date().getTime(),
         }
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       } else if (action.type === 'UNDO_ACTION') {
         if (state.history.length === 0) {
           return state
@@ -148,6 +159,15 @@ const NoteView = (props: NoteProps) => {
         return {
           notes: state.history[0],
           history: state.history.slice(1),
+          lastUserAction: new Date().getTime(),
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      } else if (action.type === 'INDENTATION_ACTION') {
+        return {
+          notes: state.notes.map((note, index) => {
+            return index === action.index ? { ...note, indentation: action.indentation } : note
+          }),
+          history: [state.notes, ...state.history],
           lastUserAction: new Date().getTime(),
         }
       } else {
@@ -225,6 +245,14 @@ const NoteView = (props: NoteProps) => {
   const undo = () => {
     dispatch({
       type: 'UNDO_ACTION',
+    })
+  }
+
+  const setIndentation = (index: number, indentation: number) => {
+    dispatch({
+      type: 'INDENTATION_ACTION',
+      index,
+      indentation,
     })
   }
 
@@ -308,6 +336,7 @@ const NoteView = (props: NoteProps) => {
               editNote={editNote}
               deleteNote={deleteNote}
               setSpecificFocus={setSpecificFocus}
+              setIndentation={setIndentation}
             />
           ))}
         </FlipMove>

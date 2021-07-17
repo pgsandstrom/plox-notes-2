@@ -5,6 +5,7 @@ import Checkbox from './checkbox'
 import Button from './button'
 import { Cross } from './icons'
 import { FocusGain } from 'pages/[note]'
+import useKey from 'hooks/useKey'
 
 interface NoteRowProps {
   previousNote?: Note
@@ -15,6 +16,7 @@ interface NoteRowProps {
   editNote: (note: Note, index: number) => void
   deleteNote: (index: number) => void
   setSpecificFocus: (index: number, char: number) => void
+  setIndentation: (index: number, indentation: number) => void
 }
 
 const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
@@ -28,6 +30,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
       editNote,
       deleteNote,
       setSpecificFocus,
+      setIndentation,
     }: NoteRowProps,
     ref,
   ) => {
@@ -54,10 +57,41 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
       }
     }, [index, gainFocus, gainFocusRef])
 
+    // TODO it would be nicer to have one root useKey instead of one per row like this, but it would require some hax
+    useKey(
+      (key) => {
+        if (document.activeElement !== inputRef.current) {
+          return
+        }
+        if (key === 'h' || key === 'ArrowLeft') {
+          if (note.indentation > 0) {
+            setIndentation(index, note.indentation - 1)
+          }
+        } else {
+          if (note.indentation < 3) {
+            setIndentation(index, note.indentation + 1)
+          }
+        }
+      },
+      ['ArrowRight', 'h', 'ArrowLeft', 'l'],
+      'keydown',
+      false,
+      {
+        alt: true,
+      },
+    )
+
     // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
     // But resolve does not seem to be bundled with nextjs. Find a neat solution.
     return (
-      <div key={note.id} ref={ref} className={`note-row ${note.checked && 'checked'}`}>
+      <div
+        key={note.id}
+        ref={ref}
+        className={`note-row ${note.checked && 'checked'}`}
+        style={{
+          marginLeft: note.indentation * 10,
+        }}
+      >
         <Checkbox
           checked={note.checked}
           onChange={() => {

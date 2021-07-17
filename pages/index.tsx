@@ -1,6 +1,7 @@
 import Head from 'next/head'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 export default function Home() {
   const router = useRouter()
@@ -63,7 +64,7 @@ export default function Home() {
           <div style={{ marginTop: '20px', display: 'inline', whiteSpace: 'break-spaces' }}>
             If you are a real bös power user you can also create a list of list by adding
             &apos;meta&apos; to the start of the url, like{'\n'}
-            <a href="/meta/my-meta-list">https://bös.se/meta/my-meta-list</a>
+            <Link href="/meta/my-meta-list">https://bös.se/meta/my-meta-list</Link>
           </div>
         </main>
 
