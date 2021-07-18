@@ -61,6 +61,12 @@ interface EditNoteAction {
   index: number
 }
 
+interface CheckNoteAction {
+  type: 'CHECK_NOTE_ACTION'
+  checked: boolean
+  index: number
+}
+
 interface UndoAction {
   type: 'UNDO_ACTION'
 }
@@ -76,6 +82,7 @@ type NoteAction =
   | AddNoteAction
   | DeleteNoteAction
   | EditNoteAction
+  | CheckNoteAction
   | UndoAction
   | SetIndentationAction
 
@@ -138,17 +145,77 @@ const NoteView = (props: NoteProps) => {
         }
       } else if (action.type === 'EDIT_NOTE_ACTION') {
         return {
-          notes: state.notes
-            .map((note, index) => (index === action.index ? action.note : note))
-            .sort((a, b) => {
-              if (a.checked === b.checked) {
-                return 0
-              } else if (a.checked) {
-                return -1
-              } else {
-                return 1
-              }
-            }),
+          notes: state.notes.map((note, index) => (index === action.index ? action.note : note)),
+          history: [state.notes, ...state.history],
+          lastUserAction: new Date().getTime(),
+        }
+      } else if (action.type === 'CHECK_NOTE_ACTION') {
+        const currentIndentation = state.notes[action.index].indentation
+        let finalIndex: number | undefined = undefined
+        if (action.checked) {
+          let currentIndex = action.index - 1
+          let candidateIndex: number | undefined = action.index
+          while (finalIndex === undefined) {
+            if (currentIndex === -1) {
+              finalIndex = 0
+            } else if (state.notes[currentIndex].indentation < currentIndentation) {
+              finalIndex = candidateIndex
+            } else if (
+              state.notes[currentIndex].indentation === currentIndentation &&
+              state.notes[currentIndex].checked
+            ) {
+              finalIndex = candidateIndex
+            } else if (state.notes[currentIndex].indentation === currentIndentation) {
+              candidateIndex = currentIndex
+            }
+            currentIndex -= 1
+          }
+        } else {
+          let currentIndex = action.index + 1
+          let candidateIndex: number | undefined = action.index
+          while (finalIndex === undefined) {
+            if (currentIndex === state.notes.length) {
+              finalIndex = state.notes.length - 1
+            } else if (state.notes[currentIndex].indentation < currentIndentation) {
+              finalIndex = candidateIndex
+            } else if (
+              state.notes[currentIndex].indentation === currentIndentation &&
+              !state.notes[currentIndex].checked
+            ) {
+              finalIndex = candidateIndex
+            } else if (state.notes[currentIndex].indentation >= currentIndentation) {
+              candidateIndex = currentIndex
+            }
+            currentIndex += 1
+          }
+        }
+
+        let noteMoveCount = state.notes
+          .slice(action.index + 1)
+          .findIndex((note) => note.indentation <= currentIndentation)
+
+        if (noteMoveCount >= 0) {
+          noteMoveCount += 1
+        } else if (noteMoveCount === -1) {
+          noteMoveCount = state.notes.length - action.index
+        }
+
+        // if we move down, we have to discount the "sub notes" since they move with us
+        if (finalIndex > action.index) {
+          finalIndex = finalIndex - (noteMoveCount - 1)
+        }
+
+        const newNotes = [...state.notes]
+        const movedNotes = newNotes.splice(action.index, noteMoveCount)
+        newNotes.splice(finalIndex, 0, ...movedNotes)
+
+        newNotes[finalIndex] = {
+          ...newNotes[finalIndex],
+          checked: action.checked,
+        }
+
+        return {
+          notes: newNotes,
           history: [state.notes, ...state.history],
           lastUserAction: new Date().getTime(),
         }
@@ -218,6 +285,14 @@ const NoteView = (props: NoteProps) => {
         position: 'end',
       }
     }
+  }
+
+  const checkNote = (checked: boolean, index: number) => {
+    dispatch({
+      type: 'CHECK_NOTE_ACTION',
+      checked,
+      index,
+    })
   }
 
   const editNote = (note: Note, index: number) => {
@@ -333,6 +408,7 @@ const NoteView = (props: NoteProps) => {
               index={index}
               gainFocusRef={gainFocusRef}
               disabled={error !== undefined}
+              checkNote={checkNote}
               editNote={editNote}
               deleteNote={deleteNote}
               setSpecificFocus={setSpecificFocus}

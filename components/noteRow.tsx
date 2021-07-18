@@ -16,6 +16,7 @@ interface NoteRowProps {
   index: number
   gainFocusRef: MutableRefObject<FocusGain | undefined>
   disabled: boolean
+  checkNote: (checked: boolean, index: number) => void
   editNote: (note: Note, index: number) => void
   deleteNote: (index: number) => void
   setSpecificFocus: (index: number, char: number) => void
@@ -30,6 +31,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
       index,
       gainFocusRef,
       disabled,
+      checkNote,
       editNote,
       deleteNote,
       setSpecificFocus,
@@ -108,7 +110,7 @@ const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
         <Checkbox
           checked={note.checked}
           onChange={() => {
-            editNote({ ...note, checked: !note.checked }, index)
+            checkNote(!note.checked, index)
           }}
         />
         <TextareaAutosize
