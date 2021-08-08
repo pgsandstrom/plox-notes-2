@@ -22,9 +22,9 @@ export default function Home() {
       <div
         style={{
           display: 'flex',
-          flex: '1 0 auto',
           flexDirection: 'column',
           maxWidth: '500px',
+          padding: '0 20px',
           margin: '0 auto',
         }}
       >
@@ -62,7 +62,12 @@ export default function Home() {
           </button>
 
           <div style={{ marginTop: '20px', display: 'inline', whiteSpace: 'break-spaces' }}>
-            If you are a real bös power user you can also create a list of list by adding
+            You can swipe on rows to indent them. Or press alt and arrow keys to indent. For you
+            awesome vim users out there you can also indent with alt + h/l.
+          </div>
+
+          <div style={{ marginTop: '20px', display: 'inline', whiteSpace: 'break-spaces' }}>
+            If you are a real bös power user you can also create a list of lists by adding
             &apos;meta&apos; to the start of the url, like{'\n'}
             <Link href="/meta/my-meta-list">https://bös.se/meta/my-meta-list</Link>
           </div>
