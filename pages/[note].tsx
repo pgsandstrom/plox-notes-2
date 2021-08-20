@@ -23,12 +23,12 @@ export const getServerSideProps: GetServerSideProps<NoteProps> = async (context)
   return { props: { notes } }
 }
 
-const newNote = (checked: boolean, text?: string): Note => {
+const newNote = (checked: boolean, text: string, indentation: number): Note => {
   return {
     id: uuidv4(),
-    text: text ?? '',
+    text,
     checked,
-    indentation: 0,
+    indentation,
   }
 }
 
@@ -46,8 +46,9 @@ interface SetNoteAction {
 interface AddNoteAction {
   type: 'ADD_NOTE_ACTION'
   index: number
-  text?: string
+  text: string
   checked?: boolean
+  indentation: number
 }
 
 interface DeleteNoteAction {
@@ -128,7 +129,7 @@ const NoteView = (props: NoteProps) => {
         return {
           notes: [
             ...state.notes.slice(0, action.index),
-            newNote(checked, action.text),
+            newNote(checked, action.text, action.indentation),
             ...state.notes.slice(action.index, state.notes.length),
           ],
           history: [state.notes, ...state.history],
@@ -255,12 +256,13 @@ const NoteView = (props: NoteProps) => {
     })
   }
 
-  const addNote = (index: number, text?: string, checked?: boolean) => {
+  const addNote = (index: number, text: string, checked: boolean, indentation: number) => {
     dispatch({
       type: 'ADD_NOTE_ACTION',
       index,
       text,
       checked,
+      indentation,
     })
     gainFocusRef.current = {
       index,
@@ -301,7 +303,7 @@ const NoteView = (props: NoteProps) => {
       note.text = original
       const isLastCheckedNote =
         noteState.notes.length - 1 === index || noteState.notes[index + 1].checked === false
-      addNote(index + 1, newText, isLastCheckedNote ? false : note.checked)
+      addNote(index + 1, newText, isLastCheckedNote ? false : note.checked, note.indentation)
     }
     dispatch({
       type: 'EDIT_NOTE_ACTION',
@@ -419,7 +421,7 @@ const NoteView = (props: NoteProps) => {
         <footer style={{ display: 'flex', flex: '0 0 auto', marginBottom: '1px' }}>
           <Button
             style={{ flex: '1 0 0', height: '50px' }}
-            onClick={() => addNote(noteState.notes.length)}
+            onClick={() => addNote(noteState.notes.length, '', false, 0)}
             disabled={error !== undefined}
           >
             Add
