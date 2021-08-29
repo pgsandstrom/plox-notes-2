@@ -22,7 +22,10 @@ export default function useWebsocket(
   const socketRef = useRef<Socket>()
 
   if (socketRef.current === undefined) {
-    const socket: Socket = socketio(getServerUrl())
+    const socket: Socket = socketio(getServerUrl(), {
+      reconnectionDelay: 300,
+      reconnectionDelayMax: 1500,
+    })
     socketRef.current = socket
     socket.on('connect', () => {
       onConnect()
