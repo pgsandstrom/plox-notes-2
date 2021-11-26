@@ -362,11 +362,8 @@ const NoteView = (props: NoteProps) => {
     }
   }
 
-  useDebounceObject(
-    noteState.lastUserAction,
-    saveThroughWebsocket,
-    0, // we don't debounce currently, so others viewing the document gets updated immediately.
-  )
+  // we don't debounce currently, so others viewing the document gets updated immediately.
+  useDebounceObject(noteState.lastUserAction, saveThroughWebsocket, 0)
 
   return (
     <div style={{ display: 'flex', width: '100vw', maxWidth: '100%', height: '100%' }}>
