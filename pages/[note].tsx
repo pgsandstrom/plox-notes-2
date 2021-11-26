@@ -4,11 +4,10 @@ import { v4 as uuidv4 } from 'uuid'
 import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'
 import { Note, NotePost } from 'types'
-import { useState, useRef, useReducer } from 'react'
+import { useState, useRef, useReducer, useEffect, useCallback } from 'react'
 import useWebsocket from 'hooks/useWebsocket'
 import NoteRow from 'components/noteRow'
 import Button from 'components/button'
-import { useDebounceObject } from 'hooks/useDebounce'
 import { loadOrShowNewNote } from 'server/noteController'
 import getServerUrl from 'server/util/serverUrl'
 import { LoadIcon, Check } from 'components/icons'
@@ -354,16 +353,17 @@ const NoteView = (props: NoteProps) => {
 
   const websocketEmit = useWebsocket(noteId, setError, setNotes, websocketSaveComplete, onConnect)
 
-  const saveThroughWebsocket = () => {
+  const saveThroughWebsocket = useCallback(() => {
     if (noteState.lastUserAction > 0) {
       setOngoingSaves((os) => os + 1)
       const notePost: NotePost = { id: noteId, notes: noteState.notes }
       websocketEmit(WEBSOCKET_COMMAND.POST, notePost)
     }
-  }
+  }, [noteState.lastUserAction, noteId, noteState.notes, websocketEmit])
 
-  // we don't debounce currently, so others viewing the document gets updated immediately.
-  useDebounceObject(noteState.lastUserAction, saveThroughWebsocket, 0)
+  useEffect(() => {
+    saveThroughWebsocket()
+  }, [noteState.lastUserAction, saveThroughWebsocket])
 
   return (
     <div style={{ display: 'flex', width: '100vw', maxWidth: '100%', height: '100%' }}>

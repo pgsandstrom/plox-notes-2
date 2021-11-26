@@ -24,8 +24,7 @@ export default (io: socketio.Server) => {
       }
       activeSockets[socket.id]!.noteId = noteId
       // When client clarifies who they are, send out the data to them!
-      // Is this really necessary? Only matters if data updated between page load and websocket connection
-      // Maybe remove this...
+      // This is good when a client disconnects and then connects again.
       loadNote(noteId)
         .then((notes) => {
           if (notes) {

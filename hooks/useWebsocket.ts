@@ -1,5 +1,5 @@
 import socketio, { Socket } from 'socket.io-client'
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { Note, NotePost } from 'types'
 import getServerUrl from 'server/util/serverUrl'
 import { WEBSOCKET_COMMAND } from 'server/websocketConstants'
@@ -61,7 +61,7 @@ export default function useWebsocket(
     })
   }
 
-  return (command: string, data: unknown) => {
+  return useCallback((command: string, data: unknown) => {
     socketRef.current!.emit(command, data)
-  }
+  }, [])
 }
