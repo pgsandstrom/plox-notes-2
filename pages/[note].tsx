@@ -23,7 +23,7 @@ export const getServerSideProps: GetServerSideProps<NoteProps> = async (context)
   return { props: { notes } }
 }
 
-const newNote = (checked: boolean, text: string, indentation: number): Note => {
+const createNewNote = (checked: boolean, text: string, indentation: number): Note => {
   return {
     id: uuidv4(),
     text,
@@ -93,6 +93,7 @@ export interface FocusGain {
 }
 
 const NoteView = (props: NoteProps) => {
+  console.log(`noteview`)
   const router = useRouter()
   const noteId = router.query.note as string
 
@@ -126,10 +127,11 @@ const NoteView = (props: NoteProps) => {
         }
       } else if (action.type === 'ADD_NOTE_ACTION') {
         const checked = action.checked ?? false
+        console.log('add note reducer')
         return {
           notes: [
             ...state.notes.slice(0, action.index),
-            newNote(checked, action.text, action.indentation),
+            createNewNote(checked, action.text, action.indentation),
             ...state.notes.slice(action.index, state.notes.length),
           ],
           history: [state.notes, ...state.history],
@@ -145,8 +147,45 @@ const NoteView = (props: NoteProps) => {
           lastUserAction: new Date().getTime(),
         }
       } else if (action.type === 'EDIT_NOTE_ACTION') {
+        let newNote: Note | undefined
+        let editedNote: Note
+        if (action.note.text.includes('\n')) {
+          const [original, newText] = action.note.text.split('\n')
+          editedNote = {
+            ...action.note,
+            text: original,
+          }
+
+          const isLastCheckedNote =
+            state.notes.length - 1 === action.index ||
+            state.notes[action.index + 1].checked === false
+          newNote = createNewNote(
+            isLastCheckedNote ? false : editedNote.checked,
+            newText,
+            editedNote.indentation,
+          )
+        } else {
+          editedNote = action.note
+        }
+
+        let newNotes = state.notes.map((note, index) => {
+          return index === action.index ? editedNote : note
+        })
+
+        if (newNote) {
+          newNotes = [
+            ...newNotes.slice(0, action.index + 1),
+            newNote,
+            ...newNotes.slice(action.index + 1, newNotes.length),
+          ]
+          gainFocusRef.current = {
+            index: action.index + 1,
+            position: 'start',
+          }
+        }
+
         return {
-          notes: state.notes.map((note, index) => (index === action.index ? action.note : note)),
+          notes: newNotes,
           history: [state.notes, ...state.history],
           lastUserAction: new Date().getTime(),
         }
@@ -249,89 +288,101 @@ const NoteView = (props: NoteProps) => {
     },
   )
 
-  const setNotes = (notes: Note[]) => {
-    dispatch({
-      type: 'SET_NOTE_ACTION',
-      notes,
-    })
-  }
+  const setNotes = useCallback(
+    (notes: Note[]) => {
+      dispatch({
+        type: 'SET_NOTE_ACTION',
+        notes,
+      })
+    },
+    [dispatch],
+  )
 
-  const addNote = (index: number, text: string, checked: boolean, indentation: number) => {
-    dispatch({
-      type: 'ADD_NOTE_ACTION',
-      index,
-      text,
-      checked,
-      indentation,
-    })
-    gainFocusRef.current = {
-      index,
-      position: 'start',
-    }
-  }
-
-  const deleteNote = (index: number) => {
-    dispatch({
-      type: 'DELETE_NOTE_ACTION',
-      index,
-    })
-    // Only set the focus if we currently focus a note row input
-    // This is to avoid just clicking the delete button and the onscreen keyboard showing up on mobile
-    if (
-      index > 0 &&
-      document.activeElement &&
-      document.activeElement.className.includes('note-row-input')
-    ) {
+  const addNote = useCallback(
+    (index: number, text: string, checked: boolean, indentation: number) => {
+      console.log('add note function')
+      dispatch({
+        type: 'ADD_NOTE_ACTION',
+        index,
+        text,
+        checked,
+        indentation,
+      })
       gainFocusRef.current = {
-        index: index - 1,
-        position: 'end',
+        index,
+        position: 'start',
       }
-    }
-  }
+    },
+    [dispatch],
+  )
 
-  const checkNote = (checked: boolean, index: number) => {
-    dispatch({
-      type: 'CHECK_NOTE_ACTION',
-      checked,
-      index,
-    })
-  }
+  const deleteNote = useCallback(
+    (index: number) => {
+      dispatch({
+        type: 'DELETE_NOTE_ACTION',
+        index,
+      })
+      // Only set the focus if we currently focus a note row input
+      // This is to avoid just clicking the delete button and the onscreen keyboard showing up on mobile
+      if (
+        index > 0 &&
+        document.activeElement &&
+        document.activeElement.className.includes('note-row-input')
+      ) {
+        gainFocusRef.current = {
+          index: index - 1,
+          position: 'end',
+        }
+      }
+    },
+    [dispatch],
+  )
 
-  const editNote = (note: Note, index: number) => {
-    if (note.text.includes('\n')) {
-      const [original, newText] = note.text.split('\n')
-      note.text = original
-      const isLastCheckedNote =
-        noteState.notes.length - 1 === index || noteState.notes[index + 1].checked === false
-      addNote(index + 1, newText, isLastCheckedNote ? false : note.checked, note.indentation)
-    }
-    dispatch({
-      type: 'EDIT_NOTE_ACTION',
-      note,
-      index,
-    })
-  }
+  const checkNote = useCallback(
+    (checked: boolean, index: number) => {
+      dispatch({
+        type: 'CHECK_NOTE_ACTION',
+        checked,
+        index,
+      })
+    },
+    [dispatch],
+  )
 
-  const setSpecificFocus = (index: number, char: number) => {
+  const editNote = useCallback(
+    (note: Note, index: number) => {
+      dispatch({
+        type: 'EDIT_NOTE_ACTION',
+        note,
+        index,
+      })
+    },
+    [dispatch],
+  )
+
+  const setSpecificFocus = useCallback((index: number, char: number) => {
     gainFocusRef.current = {
       index: index,
       position: char,
     }
-  }
+  }, [])
 
-  const undo = () => {
+  const undo = useCallback(() => {
     dispatch({
       type: 'UNDO_ACTION',
     })
-  }
+  }, [dispatch])
 
-  const setIndentation = (index: number, indentation: number) => {
-    dispatch({
-      type: 'INDENTATION_ACTION',
-      index,
-      indentation,
-    })
-  }
+  const setIndentation = useCallback(
+    (index: number, indentation: number) => {
+      dispatch({
+        type: 'INDENTATION_ACTION',
+        index,
+        indentation,
+      })
+    },
+    [dispatch],
+  )
 
   const saveThroughApi = async () => {
     setOngoingSaves((os) => os + 1)
