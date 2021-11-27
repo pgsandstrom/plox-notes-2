@@ -12,6 +12,7 @@ import { loadOrShowNewNote } from 'server/noteController'
 import getServerUrl from 'server/util/serverUrl'
 import { LoadIcon, Check } from 'components/icons'
 import { WEBSOCKET_COMMAND } from 'server/websocketConstants'
+import usePrevious from 'hooks/usePrevious'
 
 interface NoteProps {
   notes: Note[]
@@ -353,13 +354,14 @@ const NoteView = (props: NoteProps) => {
 
   const websocketEmit = useWebsocket(noteId, setError, setNotes, websocketSaveComplete, onConnect)
 
+  const previousLastUserAction = usePrevious(noteState.lastUserAction)
   const saveThroughWebsocket = useCallback(() => {
-    if (noteState.lastUserAction > 0) {
+    if (noteState.lastUserAction > 0 && noteState.lastUserAction !== previousLastUserAction) {
       setOngoingSaves((os) => os + 1)
       const notePost: NotePost = { id: noteId, notes: noteState.notes }
       websocketEmit(WEBSOCKET_COMMAND.POST, notePost)
     }
-  }, [noteState.lastUserAction, noteId, noteState.notes, websocketEmit])
+  }, [noteState.lastUserAction, previousLastUserAction, noteId, noteState.notes, websocketEmit])
 
   useEffect(() => {
     saveThroughWebsocket()
