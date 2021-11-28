@@ -1,6 +1,6 @@
 import { Note } from 'types'
 import TextareaAutosize from 'react-textarea-autosize'
-import { useRef, useEffect, forwardRef, MutableRefObject } from 'react'
+import { useRef, useEffect, MutableRefObject } from 'react'
 import Checkbox from './checkbox'
 import Button from './button'
 import { Cross } from './icons'
@@ -94,7 +94,7 @@ const NoteRow = ({
     },
   )
 
-  useAnimateOrder(index, ref, note.text)
+  useAnimateOrder(index, ref)
   // console.log(`render ${note.text}`)
 
   // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
