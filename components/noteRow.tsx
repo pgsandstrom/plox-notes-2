@@ -1,11 +1,12 @@
 import { Note } from 'types'
 import TextareaAutosize from 'react-textarea-autosize'
-import { useRef, useEffect, forwardRef, MutableRefObject } from 'react'
+import { useRef, useEffect, MutableRefObject } from 'react'
 import Checkbox from './checkbox'
 import Button from './button'
 import { Cross } from './icons'
 import { FocusGain } from 'pages/[note]'
 import useKey from 'hooks/useKey'
+import useAnimateOrder from 'hooks/useAnimateOrder'
 
 const SWIPE_INDENTATION_LIMIT = 30
 const SWIPE_MAX_Y_DIFF = 25
@@ -23,193 +24,192 @@ interface NoteRowProps {
   setIndentation: (index: number, indentation: number) => void
 }
 
-const NoteRow = forwardRef<HTMLDivElement, NoteRowProps>(
-  (
+const NoteRow = ({
+  note,
+  previousNote,
+  index,
+  gainFocusRef,
+  disabled,
+  checkNote,
+  editNote,
+  deleteNote,
+  setSpecificFocus,
+  setIndentation,
+}: NoteRowProps) => {
+  const ref = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  const startTouchRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
+
+  // Currently when deleting a row with keyboard presses on mobile the keyboard flickers.
+  // I have tried moving focus gaining to before deleting rows, but it results in weird bugs on mobile.
+  // Since debugging stuff like that is super frustrating on mobile, I have given up on fixing this.
+  const gainFocus = gainFocusRef.current
+  useEffect(() => {
+    const inputElement = inputRef.current
+    if (gainFocus?.index === index && inputElement) {
+      const inputLength = inputElement.value.length
+      const selectionPosition: number =
+        gainFocus.position === 'end'
+          ? inputLength
+          : gainFocus.position === 'start'
+          ? 0
+          : gainFocus.position
+      inputElement.selectionStart = selectionPosition
+      inputElement.selectionEnd = selectionPosition
+      inputElement.focus()
+      gainFocusRef.current = undefined
+    }
+  }, [index, gainFocus, gainFocusRef])
+
+  const increaseIndentation = () => {
+    if (note.indentation < 3) {
+      setIndentation(index, note.indentation + 1)
+    }
+  }
+
+  const decreaseIndentation = () => {
+    if (note.indentation > 0) {
+      setIndentation(index, note.indentation - 1)
+    }
+  }
+
+  // TODO it would be nicer to have one root useKey instead of one per row like this, but it would require some hax
+  useKey(
+    (key) => {
+      if (document.activeElement !== inputRef.current) {
+        return
+      }
+      if (key === 'h' || key === 'ArrowLeft') {
+        decreaseIndentation()
+      } else {
+        increaseIndentation()
+      }
+    },
+    ['ArrowRight', 'h', 'ArrowLeft', 'l'],
+    'keydown',
+    false,
     {
-      note,
-      previousNote,
-      index,
-      gainFocusRef,
-      disabled,
-      checkNote,
-      editNote,
-      deleteNote,
-      setSpecificFocus,
-      setIndentation,
-    }: NoteRowProps,
-    ref,
-  ) => {
-    const inputRef = useRef<HTMLTextAreaElement>(null)
+      alt: true,
+    },
+  )
 
-    const startTouchRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
+  useAnimateOrder(index, ref)
+  // console.log(`render ${note.text}`)
 
-    // Currently when deleting a row with keyboard presses on mobile the keyboard flickers.
-    // I have tried moving focus gaining to before deleting rows, but it results in weird bugs on mobile.
-    // Since debugging stuff like that is super frustrating on mobile, I have given up on fixing this.
-    const gainFocus = gainFocusRef.current
-    useEffect(() => {
-      const inputElement = inputRef.current
-      if (gainFocus?.index === index && inputElement) {
-        const inputLength = inputElement.value.length
-        const selectionPosition: number =
-          gainFocus.position === 'end'
-            ? inputLength
-            : gainFocus.position === 'start'
-            ? 0
-            : gainFocus.position
-        inputElement.selectionStart = selectionPosition
-        inputElement.selectionEnd = selectionPosition
-        inputElement.focus()
-        gainFocusRef.current = undefined
-      }
-    }, [index, gainFocus, gainFocusRef])
-
-    const increaseIndentation = () => {
-      if (note.indentation < 3) {
-        setIndentation(index, note.indentation + 1)
-      }
-    }
-
-    const decreaseIndentation = () => {
-      if (note.indentation > 0) {
-        setIndentation(index, note.indentation - 1)
-      }
-    }
-
-    // TODO it would be nicer to have one root useKey instead of one per row like this, but it would require some hax
-    useKey(
-      (key) => {
-        if (document.activeElement !== inputRef.current) {
-          return
-        }
-        if (key === 'h' || key === 'ArrowLeft') {
-          decreaseIndentation()
-        } else {
-          increaseIndentation()
-        }
-      },
-      ['ArrowRight', 'h', 'ArrowLeft', 'l'],
-      'keydown',
-      false,
-      {
-        alt: true,
-      },
-    )
-
-    // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
-    // But resolve does not seem to be bundled with nextjs. Find a neat solution.
-    return (
-      <div
-        key={note.id}
-        ref={ref}
-        className={`note-row ${note.checked && 'checked'}`}
-        style={{
-          marginLeft: note.indentation * 15,
+  // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
+  // But resolve does not seem to be bundled with nextjs. Find a neat solution.
+  return (
+    <div
+      key={note.id}
+      ref={ref}
+      className={`note-row ${note.checked && 'checked'}`}
+      style={{
+        marginLeft: note.indentation * 15,
+      }}
+    >
+      <Checkbox
+        checked={note.checked}
+        onChange={() => {
+          checkNote(!note.checked, index)
         }}
-      >
-        <Checkbox
-          checked={note.checked}
-          onChange={() => {
-            checkNote(!note.checked, index)
-          }}
-        />
-        <TextareaAutosize
-          className="note-row-input"
-          value={note.text}
-          onChange={(e) => {
-            editNote({ ...note, text: e.target.value }, index)
-          }}
-          onKeyDown={(e) => {
-            const inputElement = inputRef.current
-            if (
-              e.key === 'Backspace' &&
-              inputElement?.selectionStart === 0 &&
-              inputElement.selectionEnd === 0
-            ) {
-              e.preventDefault()
-              deleteNote(index)
-              if (previousNote) {
-                editNote(
-                  {
-                    ...previousNote,
-                    text: `${previousNote.text}${note.text}`,
-                  },
-                  index - 1,
-                )
-                setSpecificFocus(index - 1, previousNote.text.length)
-              }
+      />
+      <TextareaAutosize
+        className="note-row-input"
+        value={note.text}
+        onChange={(e) => {
+          editNote({ ...note, text: e.target.value }, index)
+        }}
+        onKeyDown={(e) => {
+          const inputElement = inputRef.current
+          if (
+            e.key === 'Backspace' &&
+            inputElement?.selectionStart === 0 &&
+            inputElement.selectionEnd === 0
+          ) {
+            e.preventDefault()
+            deleteNote(index)
+            if (previousNote) {
+              editNote(
+                {
+                  ...previousNote,
+                  text: `${previousNote.text}${note.text}`,
+                },
+                index - 1,
+              )
+              setSpecificFocus(index - 1, previousNote.text.length)
             }
-          }}
-          onTouchStart={(e) => {
-            if (e.changedTouches.length === 0) {
-              return
-            }
-            startTouchRef.current = {
-              x: e.changedTouches[0].clientX,
-              y: e.changedTouches[0].clientY,
-            }
-          }}
-          onTouchEnd={(e) => {
-            if (e.changedTouches.length === 0) {
-              return
-            }
-            const startX = startTouchRef.current.x
-            const startY = startTouchRef.current.y
-            const endX = e.changedTouches[0].clientX
-            const endY = e.changedTouches[0].clientY
+          }
+        }}
+        onTouchStart={(e) => {
+          if (e.changedTouches.length === 0) {
+            return
+          }
+          startTouchRef.current = {
+            x: e.changedTouches[0].clientX,
+            y: e.changedTouches[0].clientY,
+          }
+        }}
+        onTouchEnd={(e) => {
+          if (e.changedTouches.length === 0) {
+            return
+          }
+          const startX = startTouchRef.current.x
+          const startY = startTouchRef.current.y
+          const endX = e.changedTouches[0].clientX
+          const endY = e.changedTouches[0].clientY
 
-            if (Math.abs(endY - startY) > SWIPE_MAX_Y_DIFF) {
-              return
-            }
-
-            if (endX - startX > SWIPE_INDENTATION_LIMIT) {
-              increaseIndentation()
-            } else if (endX - startX < -SWIPE_INDENTATION_LIMIT) {
-              decreaseIndentation()
-            }
-          }}
-          disabled={disabled}
-          ref={inputRef}
-        />
-        <Button onClick={() => deleteNote(index)} style={{ height: '32px', marginTop: '-4px' }}>
-          <Cross style={{ marginTop: '8px', width: '16px' }} />
-        </Button>
-        <style jsx global>{`
-          .note-row {
-            display: flex;
-            align-items: center;
-            margin: 6px 0;
-            transition: margin 100ms ease-in-out;
+          if (Math.abs(endY - startY) > SWIPE_MAX_Y_DIFF) {
+            return
           }
 
-          .note-row-input {
-            border: none;
-            border-bottom: 1px solid gray;
-            flex: 1 0 0;
-            font-size: 1.2em;
-            height: 28px;
-            margin-left: 10px;
-            line-height: 28px;
-            outline: none;
-            resize: none;
+          if (endX - startX > SWIPE_INDENTATION_LIMIT) {
+            increaseIndentation()
+          } else if (endX - startX < -SWIPE_INDENTATION_LIMIT) {
+            decreaseIndentation()
           }
+        }}
+        disabled={disabled}
+        ref={inputRef}
+      />
+      <Button onClick={() => deleteNote(index)} style={{ height: '32px', marginTop: '-4px' }}>
+        <Cross style={{ marginTop: '8px', width: '16px' }} />
+      </Button>
+      <style jsx global>{`
+        .note-row {
+          display: flex;
+          align-items: center;
+          margin: 6px 0;
+          transition: margin 100ms ease-in-out;
+        }
 
-          .note-row-input:focus {
-            border-bottom: 1px solid #009fd1;
-          }
+        .note-row-input {
+          border: none;
+          border-bottom: 1px solid gray;
+          flex: 1 0 0;
+          font-size: 1.2em;
+          height: 28px;
+          margin-left: 10px;
+          line-height: 28px;
+          outline: none;
+          resize: none;
+        }
 
-          .checked {
-            color: #bebfbf;
-          }
+        .note-row-input:focus {
+          border-bottom: 1px solid #009fd1;
+        }
 
-          .checked .note-row-input {
-            color: #bebfbf;
-            text-decoration: line-through;
-          }
-        `}</style>
-      </div>
-    )
-  },
-)
+        .checked {
+          color: #bebfbf;
+        }
+
+        .checked .note-row-input {
+          color: #bebfbf;
+          text-decoration: line-through;
+        }
+      `}</style>
+    </div>
+  )
+}
 
 export default NoteRow
