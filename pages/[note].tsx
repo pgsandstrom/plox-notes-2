@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import FlipMove from 'react-flip-move'
 import { v4 as uuidv4 } from 'uuid'
 import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'

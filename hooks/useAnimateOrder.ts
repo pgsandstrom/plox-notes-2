@@ -9,7 +9,7 @@ export default function useAnimateOrder(index: number, ref: RefObject<HTMLElemen
 
   useLayoutEffect(() => {
     if (prevIndex !== undefined && prevIndex !== index && top !== undefined && refCurrent) {
-      const newTop = refCurrent?.getBoundingClientRect().top
+      const newTop = refCurrent.getBoundingClientRect().top
       // On first painted frame, we move back to old position:
       requestAnimationFrame(() => {
         const changeY = top - newTop
@@ -22,5 +22,5 @@ export default function useAnimateOrder(index: number, ref: RefObject<HTMLElemen
         })
       })
     }
-  }, [prevIndex, index])
+  }, [prevIndex, index, top, refCurrent])
 }
