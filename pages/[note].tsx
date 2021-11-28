@@ -93,7 +93,7 @@ export interface FocusGain {
 }
 
 const NoteView = (props: NoteProps) => {
-  console.log(`noteview`)
+  // console.log(`noteview`)
   const router = useRouter()
   const noteId = router.query.note as string
 
@@ -115,8 +115,10 @@ const NoteView = (props: NoteProps) => {
     })
   }
 
+  // TODO two set note actions happen on first load
   const [noteState, dispatch] = useReducer(
     (state: NoteState, action: NoteAction) => {
+      // console.log(`${action.type}`)
       if (action.type === 'SET_NOTE_ACTION') {
         return {
           notes: action.notes,
@@ -395,7 +397,7 @@ const NoteView = (props: NoteProps) => {
   }
 
   const websocketSaveComplete = () => {
-    setOngoingSaves((os) => os - 1)
+    // setOngoingSaves((os) => os - 1)
   }
 
   const onConnect = () => {
@@ -408,7 +410,8 @@ const NoteView = (props: NoteProps) => {
   const previousLastUserAction = usePrevious(noteState.lastUserAction)
   const saveThroughWebsocket = useCallback(() => {
     if (noteState.lastUserAction > 0 && noteState.lastUserAction !== previousLastUserAction) {
-      setOngoingSaves((os) => os + 1)
+      // TODO disabled ongoing save on type because it causes a bunch of renders. Maybe do something smart like detect slow save?
+      // setOngoingSaves((os) => os + 1)
       const notePost: NotePost = { id: noteId, notes: noteState.notes }
       websocketEmit(WEBSOCKET_COMMAND.POST, notePost)
     }
@@ -447,11 +450,7 @@ const NoteView = (props: NoteProps) => {
           </div>
         )}
         <div style={{ fontSize: '2em', textAlign: 'center', margin: '10px 0' }}>{noteId}</div>
-        <FlipMove
-          duration={200}
-          style={{ flex: '1 0 0', overflowY: 'auto' }}
-          leaveAnimation={false}
-        >
+        <div style={{ flex: '1 0 0', overflowY: 'auto' }}>
           {noteState.notes.map((note, index) => (
             <NoteRow
               key={note.id}
@@ -467,7 +466,7 @@ const NoteView = (props: NoteProps) => {
               setIndentation={setIndentation}
             />
           ))}
-        </FlipMove>
+        </div>
         <footer style={{ display: 'flex', flex: '0 0 auto', marginBottom: '1px' }}>
           <Button
             style={{ flex: '1 0 0', height: '50px' }}
