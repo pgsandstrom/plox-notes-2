@@ -18,7 +18,7 @@ export default function useAnimateOrder(index: number, ref: RefObject<HTMLElemen
         requestAnimationFrame(() => {
           // And on the next frame, remove the transistion to play the animation
           refCurrent.style.transform = ''
-          refCurrent.style.transition = 'transform 500ms'
+          refCurrent.style.transition = 'transform 300ms'
         })
       })
     }

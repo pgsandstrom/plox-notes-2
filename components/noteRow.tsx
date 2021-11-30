@@ -214,6 +214,7 @@ const NoteRow = ({
 
 const isPropsEqual = (prev: NoteRowProps, next: NoteRowProps) => {
   return (
+    prev.index === next.index &&
     prev.note.text === next.note.text &&
     prev.note.checked === next.note.checked &&
     prev.note.indentation === next.note.indentation &&
@@ -224,3 +225,5 @@ const isPropsEqual = (prev: NoteRowProps, next: NoteRowProps) => {
 }
 
 export default React.memo(NoteRow, isPropsEqual)
+
+// export default NoteRow
