@@ -7,6 +7,7 @@ import { Cross } from './icons'
 import { FocusGain } from 'pages/[note]'
 import useKey from 'hooks/useKey'
 import useAnimateOrder from 'hooks/useAnimateOrder'
+import React from 'react'
 
 const SWIPE_INDENTATION_LIMIT = 30
 const SWIPE_MAX_Y_DIFF = 25
@@ -95,7 +96,6 @@ const NoteRow = ({
   )
 
   useAnimateOrder(index, ref)
-  // console.log(`render ${note.text}`)
 
   // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
   // But resolve does not seem to be bundled with nextjs. Find a neat solution.
@@ -212,4 +212,15 @@ const NoteRow = ({
   )
 }
 
-export default NoteRow
+const isPropsEqual = (prev: NoteRowProps, next: NoteRowProps) => {
+  return (
+    prev.note.text === next.note.text &&
+    prev.note.checked === next.note.checked &&
+    prev.note.indentation === next.note.indentation &&
+    prev.previousNote?.text === next.previousNote?.text &&
+    prev.previousNote?.checked === next.previousNote?.checked &&
+    prev.previousNote?.indentation === next.previousNote?.indentation
+  )
+}
+
+export default React.memo(NoteRow, isPropsEqual)

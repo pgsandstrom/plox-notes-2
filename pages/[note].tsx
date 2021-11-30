@@ -92,7 +92,6 @@ export interface FocusGain {
 }
 
 const NoteView = (props: NoteProps) => {
-  // console.log(`noteview`)
   const router = useRouter()
   const noteId = router.query.note as string
 
@@ -117,7 +116,6 @@ const NoteView = (props: NoteProps) => {
   // TODO two set note actions happen on first load
   const [noteState, dispatch] = useReducer(
     (state: NoteState, action: NoteAction) => {
-      // console.log(`${action.type}`)
       if (action.type === 'SET_NOTE_ACTION') {
         return {
           notes: action.notes,
