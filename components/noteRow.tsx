@@ -172,7 +172,11 @@ const NoteRow = ({
         disabled={disabled}
         ref={inputRef}
       />
-      <Button onClick={() => deleteNote(index)} style={{ height: '32px', marginTop: '-4px' }}>
+      <Button
+        onClick={() => deleteNote(index)}
+        style={{ height: '32px', marginTop: '-4px' }}
+        disabled={disabled}
+      >
         <Cross style={{ marginTop: '8px', width: '16px' }} />
       </Button>
       <style jsx global>{`
@@ -214,6 +218,7 @@ const NoteRow = ({
 
 const isPropsEqual = (prev: NoteRowProps, next: NoteRowProps) => {
   return (
+    prev.disabled === next.disabled &&
     prev.index === next.index &&
     prev.note.text === next.note.text &&
     prev.note.checked === next.note.checked &&
