@@ -126,7 +126,6 @@ const NoteView = (props: NoteProps) => {
         }
       } else if (action.type === 'ADD_NOTE_ACTION') {
         const checked = action.checked ?? false
-        console.log('add note reducer')
         return {
           notes: [
             ...state.notes.slice(0, action.index),
@@ -299,7 +298,6 @@ const NoteView = (props: NoteProps) => {
 
   const addNote = useCallback(
     (index: number, text: string, checked: boolean, indentation: number) => {
-      console.log('add note function')
       dispatch({
         type: 'ADD_NOTE_ACTION',
         index,
@@ -467,7 +465,10 @@ const NoteView = (props: NoteProps) => {
         <footer style={{ display: 'flex', flex: '0 0 auto', marginBottom: '1px' }}>
           <Button
             style={{ flex: '1 0 0', height: '50px' }}
-            onClick={() => addNote(noteState.notes.length, '', false, 0)}
+            onClick={() => {
+              const indentation = noteState.notes[noteState.notes.length - 1].indentation
+              addNote(noteState.notes.length, '', false, indentation)
+            }}
             disabled={error !== undefined}
           >
             Add
