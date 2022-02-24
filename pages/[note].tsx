@@ -466,7 +466,7 @@ const NoteView = (props: NoteProps) => {
           <Button
             style={{ flex: '1 0 0', height: '50px' }}
             onClick={() => {
-              const indentation = noteState.notes[noteState.notes.length - 1].indentation
+              const indentation = noteState.notes[noteState.notes.length - 1]?.indentation ?? 0
               addNote(noteState.notes.length, '', false, indentation)
             }}
             disabled={error !== undefined}
