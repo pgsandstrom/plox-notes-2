@@ -1,7 +1,7 @@
 import { NoteMeta } from 'types'
 import Link from 'next/link'
 import TextareaAutosize from 'react-textarea-autosize'
-import { useRef, forwardRef, MutableRefObject, useEffect } from 'react'
+import { MutableRefObject, forwardRef, useEffect, useRef } from 'react'
 import Button from './button'
 import { Cross } from './icons'
 import { FocusGain } from 'pages/[note]'

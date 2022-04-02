@@ -1,6 +1,6 @@
 // import { save, load } from './controller/note';
 import socketio from 'socket.io'
-import { PartialDict, NotePost } from 'types'
+import { NotePost, PartialDict } from 'types'
 import { loadNote, saveNote } from './noteController'
 import { WEBSOCKET_COMMAND } from './websocketConstants'
 

@@ -1,6 +1,6 @@
 import { Note } from 'types'
 import TextareaAutosize from 'react-textarea-autosize'
-import { useRef, useEffect, MutableRefObject } from 'react'
+import { MutableRefObject, useEffect, useRef } from 'react'
 import Checkbox from './checkbox'
 import Button from './button'
 import { Cross } from './icons'

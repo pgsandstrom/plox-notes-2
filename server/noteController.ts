@@ -1,4 +1,4 @@
-import { querySingle, SQL, query } from './util/db'
+import { SQL, query, querySingle } from './util/db'
 import { Note, NoteDb } from 'types'
 import { v4 as uuidv4 } from 'uuid'
 
