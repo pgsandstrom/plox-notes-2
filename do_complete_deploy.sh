@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 
 ./prep_repo_for_deploy.sh
 
-npm install --only=prod
+npm install
 
 npm run build
 
