@@ -4,8 +4,6 @@
   "private": false,
   "scripts": {
     "dev": "nodemon",
-    "docker-build": "docker build . -t pg/bos",
-    "docker-run": "docker run -p 8080:8080 pg/bos --add-host host.docker.internal:host-gateway",
     "build": "next build && tsc --project tsconfig.server.json",
     "format": "prettier --write \"{,!(.next|dist|node_modules)/**/}!(package-lock).{json,md,js,jsx,ts,tsx,css,scss}\"",
     "lint": "node ./node_modules/eslint/bin/eslint.js --ext .ts --ext .tsx --fix .",
