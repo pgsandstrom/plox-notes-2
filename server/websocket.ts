@@ -33,8 +33,8 @@ export default (io: socketio.Server) => {
           }
         })
         // TODO send out error to client when loading or saving fails
-        .catch(() => {
-          console.error(`failed loading note ${noteId}`)
+        .catch((e) => {
+          console.error(`failed loading note ${noteId}. Error: ${JSON.stringify(e)}`)
           socket.emit(WEBSOCKET_COMMAND.SERVER_ERROR, 'Load error')
         })
     })
