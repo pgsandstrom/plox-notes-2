@@ -19,13 +19,10 @@ app
     const ioServer = new Server(server)
     websocket(ioServer)
 
-    // There seem to be something weird with loading .env.local in next.js.
-    // It seems to be undefined before next.js server is initiated?
-    // So load .env variables as late as possible
-    const port = process.env.PORT !== undefined ? parseInt(process.env.PORT, 10) : 3000
+    const port = 8080
 
     server.listen(port, () => {
-      console.log(`> Ready on http://localhost:${port}`)
+      console.log(`> Ready on http://localhost:${port}. NODE_ENV is ${process.env.NODE_ENV}`)
     })
   })
   .catch(() => console.error('failed to start server'))
