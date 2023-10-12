@@ -9,20 +9,25 @@ types.setTypeParser(20, (val: string) => {
 })
 
 let dbPool: Pool | undefined
+
 const getDbPool = () => {
   if (dbPool === undefined) {
-    dbPool = new Pool({
-      // host: process.env.DB_HOST,
-      // database: process.env.DB_DATABASE,
-      // user: process.env.DB_USER,
-      // password: process.env.DB_PASS,
-
-      host: 'db',
-      database: 'ploxnotes',
-      // port: 5432,
-      user: 'postgres',
-      password: 'postgres',
-    })
+    const dev = process.env.NODE_ENV !== 'production'
+    if (dev) {
+      dbPool = new Pool({
+        host: 'localhost',
+        database: 'ploxnotes',
+        user: 'postgres',
+        password: 'postgres',
+      })
+    } else {
+      dbPool = new Pool({
+        host: 'db',
+        database: 'ploxnotes',
+        user: 'postgres',
+        password: 'postgres',
+      })
+    }
   }
   return dbPool
 }

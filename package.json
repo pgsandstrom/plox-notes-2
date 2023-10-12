@@ -4,6 +4,8 @@
   "private": false,
   "scripts": {
     "dev": "nodemon",
+    "dev-database": "docker compose -f docker-compose-dev.yml up -d",
+    "dev-database-build": "docker compose -f docker-compose-dev.yml build",
     "build": "next build && tsc --project tsconfig.server.json",
     "docker-build": "docker compose build --no-cache",
     "docker-up": "docker compose up",

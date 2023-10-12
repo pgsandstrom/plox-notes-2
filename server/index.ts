@@ -19,7 +19,7 @@ app
     const ioServer = new Server(server)
     websocket(ioServer)
 
-    const port = 8080
+    const port = 3000
 
     server.listen(port, () => {
       console.log(`> Ready on http://localhost:${port}. NODE_ENV is ${process.env.NODE_ENV}`)
