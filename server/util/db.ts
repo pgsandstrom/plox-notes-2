@@ -19,6 +19,7 @@ const getDbPool = () => {
 
       host: 'db',
       database: 'ploxnotes',
+      // port: 5432,
       user: 'postgres',
       password: 'postgres',
     })

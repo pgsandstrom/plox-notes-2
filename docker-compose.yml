@@ -12,8 +12,9 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=ploxnotes
       - POSTGRES_PASSWORD=postgres
-    ports:
-      - '5432:5432'
+    # "ports" are only needed if we want them exposed to the world at large:
+    # ports:
+    # - '5432:5432'
     volumes:
       - db:/var/lib/postgresql/data
       - ./db/:/docker-entrypoint-initdb.d/
