@@ -3,7 +3,7 @@ FROM node:18
 # Create app directory
 WORKDIR /app
 
-EXPOSE 8080
+EXPOSE 3000
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied

@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": false,
   "scripts": {
+    "build": "next build && tsc --project tsconfig.server.json",
     "dev": "nodemon",
     "dev-database": "docker compose -f docker-compose-dev.yml up -d",
     "dev-database-build": "docker compose -f docker-compose-dev.yml build",
-    "build": "next build && tsc --project tsconfig.server.json",
     "docker-build": "docker compose build --no-cache",
     "docker-up": "docker compose up",
     "format": "prettier --write \"{,!(.next|dist|node_modules)/**/}!(package-lock).{json,md,js,jsx,ts,tsx,css,scss}\"",
