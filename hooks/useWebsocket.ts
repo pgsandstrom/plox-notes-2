@@ -67,7 +67,7 @@ export default function useWebsocket(
     const visibilityChangeCb = () => {
       if (document.visibilityState === 'visible') {
         if (socketRef.current && !socketRef.current.connected) {
-          socketRef.current.connect()
+          socketRef.current.close().open()
         }
       }
     }
