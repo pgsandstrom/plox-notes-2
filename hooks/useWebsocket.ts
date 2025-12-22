@@ -1,5 +1,5 @@
 import socketio, { Socket } from 'socket.io-client'
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { Note, NotePost } from 'types'
 import getServerUrl from 'server/util/serverUrl'
 import { WEBSOCKET_COMMAND } from 'server/websocketConstants'
@@ -60,6 +60,22 @@ export default function useWebsocket(
       setError('Reconnect failed')
     })
   }
+
+  // Currently, when returning to a sleeping tab, it takes several seconds to determine that we are disconnected.
+  // This useEffect is an attempt to fix this.
+  useEffect(() => {
+    const visibilityChangeCb = () => {
+      if (document.visibilityState === 'visible') {
+        if (socketRef.current && !socketRef.current.connected) {
+          socketRef.current.connect()
+        }
+      }
+    }
+    document.addEventListener('visibilitychange', visibilityChangeCb)
+    return () => {
+      document.removeEventListener('visibilitychange', visibilityChangeCb)
+    }
+  }, [])
 
   return useCallback((command: string, data: unknown) => {
     socketRef.current!.emit(command, data)
