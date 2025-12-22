@@ -83,7 +83,7 @@ export default function Home() {
         >
           <span>
             Bugs or suggestions? Project is on{' '}
-            <a href="https://github.com/pgsandstrom/PloxNotes2">Github</a>.
+            <a href="https://github.com/pgsandstrom/PloxNotes2">Github</a>!
           </span>
         </footer>
       </div>
