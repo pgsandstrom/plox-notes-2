@@ -6,6 +6,8 @@ This is the followup to the ancient PloxNotes project. This uses next.js instead
 
 It uses a custom server to enable websocket usage on the server. In hindsight, it would have been better to use default server and simply have websocket logic in a separate node process. But you know, what's done is done. No big deal.
 
+This project is a bit shit codewise and have not received any love for several years. But it works. Thats something.
+
 ## Getting Started
 
 To start dev mode:
@@ -15,4 +17,6 @@ npm install
 npm run dev
 ```
 
-Prod you ask? Well we use docker. So you know.
+## release
+
+Just run `npm run docker-build && npm run docker-up` and you are good to go.
