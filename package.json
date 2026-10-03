@@ -6,8 +6,6 @@
     "build": "next build",
     "dev": "PGPORT=${PGPORT:-5433} node --watch-path=server --watch-path=types server/index.ts",
     "dev-database": "docker compose -f docker-compose-dev.yml up -d",
-    "docker-build": "docker compose build --no-cache",
-    "docker-up": "docker compose up -d",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "knip": "pnpm run knip:production && pnpm run knip:default",
@@ -17,6 +15,7 @@
     "pre-commit": "lint-staged",
     "pre-push": "pnpm run validate && pnpm run format:check",
     "prepare": "husky",
+    "release": "docker compose up -d --build",
     "start": "NODE_ENV=production node server/index.ts",
     "typecheck": "next typegen && tsc --noEmit",
     "validate": "pnpm run typecheck && pnpm run lint"

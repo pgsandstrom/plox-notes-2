@@ -32,4 +32,4 @@ Before pushing, `pnpm validate` runs typecheck and lint, and `pnpm knip` finds u
 
 ## release
 
-Just run `pnpm docker-build && pnpm docker-up` and you are good to go.
+Run `pnpm release` on the server. It builds the image and (re)starts the app and database with docker compose. The app is exposed on port 8088.
