@@ -1,9 +1,9 @@
-version: '3.8'
+version: "3.8"
 services:
   web:
     build: .
     ports:
-      - '8088:3000'
+      - "8088:3000"
     restart: always
   db:
     image: postgres:16

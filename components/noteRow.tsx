@@ -1,13 +1,14 @@
-import { Note } from 'types'
-import TextareaAutosize from 'react-textarea-autosize'
-import { MutableRefObject, useEffect, useRef } from 'react'
-import Checkbox from './checkbox'
-import Button from './button'
-import { Cross } from './icons'
-import { FocusGain } from 'pages/[note]'
-import useKey from 'hooks/useKey'
-import useAnimateOrder from 'hooks/useAnimateOrder'
-import React from 'react'
+import { MutableRefObject, useEffect, useRef } from "react"
+import React from "react"
+import TextareaAutosize from "react-textarea-autosize"
+
+import useAnimateOrder from "../hooks/useAnimateOrder"
+import useKey from "../hooks/useKey"
+import { FocusGain } from "../pages/[note]"
+import { Note } from "../types"
+import Button from "./button"
+import Checkbox from "./checkbox"
+import { Cross } from "./icons"
 
 const SWIPE_INDENTATION_LIMIT = 30
 const SWIPE_MAX_Y_DIFF = 25
@@ -51,11 +52,11 @@ const NoteRow = ({
     if (gainFocus?.index === index && inputElement) {
       const inputLength = inputElement.value.length
       const selectionPosition: number =
-        gainFocus.position === 'end'
+        gainFocus.position === "end"
           ? inputLength
-          : gainFocus.position === 'start'
-          ? 0
-          : gainFocus.position
+          : gainFocus.position === "start"
+            ? 0
+            : gainFocus.position
       inputElement.selectionStart = selectionPosition
       inputElement.selectionEnd = selectionPosition
       inputElement.focus()
@@ -81,14 +82,14 @@ const NoteRow = ({
       if (document.activeElement !== inputRef.current) {
         return
       }
-      if (key === 'h' || key === 'ArrowLeft') {
+      if (key === "h" || key === "ArrowLeft") {
         decreaseIndentation()
       } else {
         increaseIndentation()
       }
     },
-    ['ArrowRight', 'h', 'ArrowLeft', 'l'],
-    'keydown',
+    ["ArrowRight", "h", "ArrowLeft", "l"],
+    "keydown",
     false,
     {
       alt: true,
@@ -103,7 +104,7 @@ const NoteRow = ({
     <div
       key={note.id}
       ref={ref}
-      className={`note-row ${note.checked && 'checked'}`}
+      className={`note-row ${note.checked && "checked"}`}
       style={{
         marginLeft: note.indentation * 15,
       }}
@@ -123,7 +124,7 @@ const NoteRow = ({
         onKeyDown={(e) => {
           const inputElement = inputRef.current
           if (
-            e.key === 'Backspace' &&
+            e.key === "Backspace" &&
             inputElement?.selectionStart === 0 &&
             inputElement.selectionEnd === 0
           ) {
@@ -174,10 +175,10 @@ const NoteRow = ({
       />
       <Button
         onClick={() => deleteNote(index)}
-        style={{ height: '32px', marginTop: '-4px' }}
+        style={{ height: "32px", marginTop: "-4px" }}
         disabled={disabled}
       >
-        <Cross style={{ marginTop: '8px', width: '16px' }} />
+        <Cross style={{ marginTop: "8px", width: "16px" }} />
       </Button>
       <style jsx global>{`
         .note-row {

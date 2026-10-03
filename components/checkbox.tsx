@@ -7,7 +7,7 @@ export default function Checkbox({ checked, onChange }: CheckboxProps) {
   // TODO it would be cool with proper checkboxes that don't look like shit, and also has a good "focus" look.
   return (
     <>
-      <button onClick={() => onChange(!checked)} className={checked ? 'checked' : ''}>
+      <button onClick={() => onChange(!checked)} className={checked ? "checked" : ""}>
         {checked ? (
           <svg
             aria-hidden="true"
@@ -17,7 +17,7 @@ export default function Checkbox({ checked, onChange }: CheckboxProps) {
             role="img"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 448 512"
-            style={{ width: '32px' }}
+            style={{ width: "32px" }}
           >
             <path
               fill="currentColor"
@@ -33,7 +33,7 @@ export default function Checkbox({ checked, onChange }: CheckboxProps) {
             role="img"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 448 512"
-            style={{ width: '32px' }}
+            style={{ width: "32px" }}
           >
             <path
               fill="currentColor"

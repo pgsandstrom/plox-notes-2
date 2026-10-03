@@ -1,11 +1,11 @@
-import { DependencyList, useEffect } from 'react'
+import { DependencyList, useEffect } from "react"
 
-type KeyThingies = 'keydown' | 'keypress' | 'keyup'
+type KeyThingies = "keydown" | "keypress" | "keyup"
 
 const useKey = (
   callback: ((key: string) => any) | undefined,
   keys: string | string[],
-  keyevent: KeyThingies = 'keydown',
+  keyevent: KeyThingies = "keydown",
   disabled = false,
   extraKeys?: {
     ctrl?: boolean
@@ -26,7 +26,7 @@ const useKey = (
         if (extraKeys?.shift && !ev.shiftKey) {
           return
         }
-        if (typeof keys === 'string') {
+        if (typeof keys === "string") {
           if (ev.key === keys) {
             ev.preventDefault()
             if (callback) {
@@ -49,7 +49,8 @@ const useKey = (
         window.document.removeEventListener(keyevent, callbackWrapper)
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // the caller decides the dependencies
+    // oxlint-disable-next-line @eslint-react/exhaustive-deps
   }, dependencies)
 }
 

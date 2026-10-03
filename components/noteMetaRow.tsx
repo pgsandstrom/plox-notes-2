@@ -1,10 +1,11 @@
-import { NoteMeta } from 'types'
-import Link from 'next/link'
-import TextareaAutosize from 'react-textarea-autosize'
-import { MutableRefObject, forwardRef, useEffect, useRef } from 'react'
-import Button from './button'
-import { Cross } from './icons'
-import { FocusGain } from 'pages/[note]'
+import Link from "next/link"
+import { MutableRefObject, forwardRef, useEffect, useRef } from "react"
+import TextareaAutosize from "react-textarea-autosize"
+
+import { FocusGain } from "../pages/[note]"
+import { NoteMeta } from "../types"
+import Button from "./button"
+import { Cross } from "./icons"
 
 interface NoteRowProps {
   previousNote?: NoteMeta
@@ -48,11 +49,11 @@ const NoteMetaRow = forwardRef<HTMLDivElement, NoteRowProps>(
       if (gainFocus?.index === index && inputElement) {
         const inputLength = inputElement.value.length
         const selectionPosition: number =
-          gainFocus.position === 'end'
+          gainFocus.position === "end"
             ? inputLength
-            : gainFocus.position === 'start'
-            ? 0
-            : gainFocus.position
+            : gainFocus.position === "start"
+              ? 0
+              : gainFocus.position
         inputElement.selectionStart = selectionPosition
         inputElement.selectionEnd = selectionPosition
         inputElement.focus()
@@ -64,7 +65,7 @@ const NoteMetaRow = forwardRef<HTMLDivElement, NoteRowProps>(
       // TODO centering all of these more could be nice. Maybe just move this to its own component.
       return (
         <>
-          <div className="note-row" style={{ marginBottom: '20px', marginLeft: '20px' }}>
+          <div className="note-row" style={{ marginBottom: "20px", marginLeft: "20px" }}>
             <Link href={`/${note.text}`}>{note.text}</Link>
           </div>
           {getStyle()}
@@ -85,7 +86,7 @@ const NoteMetaRow = forwardRef<HTMLDivElement, NoteRowProps>(
           onKeyDown={(e) => {
             const inputElement = inputRef.current
             if (
-              e.key === 'Backspace' &&
+              e.key === "Backspace" &&
               inputElement?.selectionStart === 0 &&
               inputElement.selectionEnd === 0
             ) {
@@ -106,8 +107,8 @@ const NoteMetaRow = forwardRef<HTMLDivElement, NoteRowProps>(
           disabled={disabled}
           ref={inputRef}
         />
-        <Button onClick={() => deleteNote(index)} style={{ height: '32px', marginTop: '-4px' }}>
-          <Cross style={{ marginTop: '8px', width: '16px' }} />
+        <Button onClick={() => deleteNote(index)} style={{ height: "32px", marginTop: "-4px" }}>
+          <Cross style={{ marginTop: "8px", width: "16px" }} />
         </Button>
         {getStyle()}
       </div>

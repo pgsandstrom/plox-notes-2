@@ -1,8 +1,9 @@
-import socketio, { Socket } from 'socket.io-client'
-import { useCallback, useEffect, useRef } from 'react'
-import { Note, NotePost } from 'types'
-import getServerUrl from 'server/util/serverUrl'
-import { WEBSOCKET_COMMAND } from 'server/websocketConstants'
+import { useCallback, useEffect, useRef } from "react"
+import socketio, { Socket } from "socket.io-client"
+
+import getServerUrl from "../server/util/serverUrl"
+import { WEBSOCKET_COMMAND } from "../server/websocketConstants"
+import { Note, NotePost } from "../types"
 
 // TODO we could really have a better type system for sending stuff through the websocket.
 export default function useWebsocket(
@@ -13,11 +14,11 @@ export default function useWebsocket(
   onConnect: () => void,
 ): (command: string, data: unknown) => void {
   // hax so websocket stuff is not ran on SSR
-  if (typeof window === 'undefined') {
-    // eslint-disable-next-line
+  if (typeof window === "undefined") {
     return {} as any
   }
-  /* eslint-disable react-hooks/rules-of-hooks */
+  // hooks are only skipped during SSR, so the call order is stable on the client
+  /* oxlint-disable @eslint-react/rules-of-hooks */
 
   const socketRef = useRef<Socket>()
 
@@ -27,15 +28,15 @@ export default function useWebsocket(
       reconnectionDelayMax: 1500,
     })
     socketRef.current = socket
-    socket.on('connect', () => {
+    socket.on("connect", () => {
       onConnect()
       socket.emit(WEBSOCKET_COMMAND.SET_ID, noteId)
     })
-    socket.on('connect_error', () => {
-      setError('Connect error')
+    socket.on("connect_error", () => {
+      setError("Connect error")
     })
-    socket.on('connect_timeout', () => {
-      setError('Connect timeout')
+    socket.on("connect_timeout", () => {
+      setError("Connect timeout")
     })
     socket.on(WEBSOCKET_COMMAND.LOAD, (data: NotePost) => {
       setNotes(data.notes)
@@ -43,21 +44,21 @@ export default function useWebsocket(
     socket.on(WEBSOCKET_COMMAND.SERVER_ERROR, (data: string) => {
       setError(data)
     })
-    socket.on('ok', () => {
+    socket.on("ok", () => {
       saveComplete()
     })
-    socket.on('disconnect', () => {
-      setError('Disconnected')
+    socket.on("disconnect", () => {
+      setError("Disconnected")
     })
-    socket.on('error', (errorObj: any) => {
-      setError('Connect error')
+    socket.on("error", (errorObj: any) => {
+      setError("Connect error")
       console.log(`error: ${JSON.stringify(errorObj)}`)
     })
-    socket.on('reconnect_error', (_errorObj: any) => {
-      setError('Reconnect error')
+    socket.on("reconnect_error", (_errorObj: any) => {
+      setError("Reconnect error")
     })
-    socket.on('reconnect_failed', (_errorObj: any) => {
-      setError('Reconnect failed')
+    socket.on("reconnect_failed", (_errorObj: any) => {
+      setError("Reconnect failed")
     })
   }
 
@@ -65,15 +66,15 @@ export default function useWebsocket(
   // This useEffect is an attempt to fix this.
   useEffect(() => {
     const visibilityChangeCb = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible") {
         if (socketRef.current && !socketRef.current.connected) {
           socketRef.current.close().open()
         }
       }
     }
-    document.addEventListener('visibilitychange', visibilityChangeCb)
+    document.addEventListener("visibilitychange", visibilityChangeCb)
     return () => {
-      document.removeEventListener('visibilitychange', visibilityChangeCb)
+      document.removeEventListener("visibilitychange", visibilityChangeCb)
     }
   }, [])
 

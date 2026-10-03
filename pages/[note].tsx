@@ -1,17 +1,18 @@
-import Head from 'next/head'
-import { v4 as uuidv4 } from 'uuid'
-import { useRouter } from 'next/router'
-import { GetServerSideProps } from 'next'
-import { Note, NotePost } from 'types'
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import useWebsocket from 'hooks/useWebsocket'
-import NoteRow from 'components/noteRow'
-import Button from 'components/button'
-import { loadOrShowNewNote } from 'server/noteController'
-import getServerUrl from 'server/util/serverUrl'
-import { Check, LoadIcon } from 'components/icons'
-import { WEBSOCKET_COMMAND } from 'server/websocketConstants'
-import usePrevious from 'hooks/usePrevious'
+import { GetServerSideProps } from "next"
+import Head from "next/head"
+import { useRouter } from "next/router"
+import { useCallback, useEffect, useReducer, useRef, useState } from "react"
+import { v4 as uuidv4 } from "uuid"
+
+import Button from "../components/button"
+import { Check, LoadIcon } from "../components/icons"
+import NoteRow from "../components/noteRow"
+import usePrevious from "../hooks/usePrevious"
+import useWebsocket from "../hooks/useWebsocket"
+import { loadOrShowNewNote } from "../server/noteController"
+import getServerUrl from "../server/util/serverUrl"
+import { WEBSOCKET_COMMAND } from "../server/websocketConstants"
+import { Note, NotePost } from "../types"
 
 interface NoteProps {
   notes: Note[]
@@ -38,12 +39,12 @@ interface NoteState {
 }
 
 interface SetNoteAction {
-  type: 'SET_NOTE_ACTION'
+  type: "SET_NOTE_ACTION"
   notes: Note[]
 }
 
 interface AddNoteAction {
-  type: 'ADD_NOTE_ACTION'
+  type: "ADD_NOTE_ACTION"
   index: number
   text: string
   checked?: boolean
@@ -51,28 +52,28 @@ interface AddNoteAction {
 }
 
 interface DeleteNoteAction {
-  type: 'DELETE_NOTE_ACTION'
+  type: "DELETE_NOTE_ACTION"
   index: number
 }
 
 interface EditNoteAction {
-  type: 'EDIT_NOTE_ACTION'
+  type: "EDIT_NOTE_ACTION"
   note: Note
   index: number
 }
 
 interface CheckNoteAction {
-  type: 'CHECK_NOTE_ACTION'
+  type: "CHECK_NOTE_ACTION"
   checked: boolean
   index: number
 }
 
 interface UndoAction {
-  type: 'UNDO_ACTION'
+  type: "UNDO_ACTION"
 }
 
 interface SetIndentationAction {
-  type: 'INDENTATION_ACTION'
+  type: "INDENTATION_ACTION"
   indentation: number
   index: number
 }
@@ -88,7 +89,7 @@ type NoteAction =
 
 export interface FocusGain {
   index: number
-  position: 'start' | 'end' | number
+  position: "start" | "end" | number
 }
 
 const NoteView = (props: NoteProps) => {
@@ -100,7 +101,7 @@ const NoteView = (props: NoteProps) => {
   const [error, setError] = useState<string>()
   const gainFocusRef = useRef<FocusGain | undefined>({
     index: props.notes.length - 1,
-    position: 'end',
+    position: "end",
   })
 
   const isNotesIdentical = (notes1: Note[], notes2: Note[]) => {
@@ -116,7 +117,7 @@ const NoteView = (props: NoteProps) => {
   // TODO two set note actions happen on first load
   const [noteState, dispatch] = useReducer(
     (state: NoteState, action: NoteAction) => {
-      if (action.type === 'SET_NOTE_ACTION') {
+      if (action.type === "SET_NOTE_ACTION") {
         return {
           notes: action.notes,
           history: isNotesIdentical(state.notes, action.notes)
@@ -124,7 +125,7 @@ const NoteView = (props: NoteProps) => {
             : [state.notes, ...state.history],
           lastUserAction: state.lastUserAction,
         }
-      } else if (action.type === 'ADD_NOTE_ACTION') {
+      } else if (action.type === "ADD_NOTE_ACTION") {
         const checked = action.checked ?? false
         return {
           notes: [
@@ -135,7 +136,7 @@ const NoteView = (props: NoteProps) => {
           history: [state.notes, ...state.history],
           lastUserAction: new Date().getTime(),
         }
-      } else if (action.type === 'DELETE_NOTE_ACTION') {
+      } else if (action.type === "DELETE_NOTE_ACTION") {
         return {
           notes: [
             ...state.notes.slice(0, action.index),
@@ -144,11 +145,11 @@ const NoteView = (props: NoteProps) => {
           history: [state.notes, ...state.history],
           lastUserAction: new Date().getTime(),
         }
-      } else if (action.type === 'EDIT_NOTE_ACTION') {
+      } else if (action.type === "EDIT_NOTE_ACTION") {
         let newNote: Note | undefined
         let editedNote: Note
-        if (action.note.text.includes('\n')) {
-          const [original, newText] = action.note.text.split('\n')
+        if (action.note.text.includes("\n")) {
+          const [original, newText] = action.note.text.split("\n")
           editedNote = {
             ...action.note,
             text: original,
@@ -178,7 +179,7 @@ const NoteView = (props: NoteProps) => {
           ]
           gainFocusRef.current = {
             index: action.index + 1,
-            position: 'start',
+            position: "start",
           }
         }
 
@@ -187,7 +188,7 @@ const NoteView = (props: NoteProps) => {
           history: [state.notes, ...state.history],
           lastUserAction: new Date().getTime(),
         }
-      } else if (action.type === 'CHECK_NOTE_ACTION') {
+      } else if (action.type === "CHECK_NOTE_ACTION") {
         const currentIndentation = state.notes[action.index].indentation
         let finalIndex: number | undefined = undefined
         if (action.checked) {
@@ -257,7 +258,7 @@ const NoteView = (props: NoteProps) => {
           history: [state.notes, ...state.history],
           lastUserAction: new Date().getTime(),
         }
-      } else if (action.type === 'UNDO_ACTION') {
+      } else if (action.type === "UNDO_ACTION") {
         if (state.history.length === 0) {
           return state
         }
@@ -266,8 +267,8 @@ const NoteView = (props: NoteProps) => {
           history: state.history.slice(1),
           lastUserAction: new Date().getTime(),
         }
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      } else if (action.type === 'INDENTATION_ACTION') {
+        // oxlint-disable-next-line typescript/no-unnecessary-condition
+      } else if (action.type === "INDENTATION_ACTION") {
         return {
           notes: state.notes.map((note, index) => {
             return index === action.index ? { ...note, indentation: action.indentation } : note
@@ -289,7 +290,7 @@ const NoteView = (props: NoteProps) => {
   const setNotes = useCallback(
     (notes: Note[]) => {
       dispatch({
-        type: 'SET_NOTE_ACTION',
+        type: "SET_NOTE_ACTION",
         notes,
       })
     },
@@ -299,7 +300,7 @@ const NoteView = (props: NoteProps) => {
   const addNote = useCallback(
     (index: number, text: string, checked: boolean, indentation: number) => {
       dispatch({
-        type: 'ADD_NOTE_ACTION',
+        type: "ADD_NOTE_ACTION",
         index,
         text,
         checked,
@@ -307,7 +308,7 @@ const NoteView = (props: NoteProps) => {
       })
       gainFocusRef.current = {
         index,
-        position: 'start',
+        position: "start",
       }
     },
     [dispatch],
@@ -316,7 +317,7 @@ const NoteView = (props: NoteProps) => {
   const deleteNote = useCallback(
     (index: number) => {
       dispatch({
-        type: 'DELETE_NOTE_ACTION',
+        type: "DELETE_NOTE_ACTION",
         index,
       })
       // Only set the focus if we currently focus a note row input
@@ -324,11 +325,11 @@ const NoteView = (props: NoteProps) => {
       if (
         index > 0 &&
         document.activeElement &&
-        document.activeElement.className.includes('note-row-input')
+        document.activeElement.className.includes("note-row-input")
       ) {
         gainFocusRef.current = {
           index: index - 1,
-          position: 'end',
+          position: "end",
         }
       }
     },
@@ -338,7 +339,7 @@ const NoteView = (props: NoteProps) => {
   const checkNote = useCallback(
     (checked: boolean, index: number) => {
       dispatch({
-        type: 'CHECK_NOTE_ACTION',
+        type: "CHECK_NOTE_ACTION",
         checked,
         index,
       })
@@ -349,7 +350,7 @@ const NoteView = (props: NoteProps) => {
   const editNote = useCallback(
     (note: Note, index: number) => {
       dispatch({
-        type: 'EDIT_NOTE_ACTION',
+        type: "EDIT_NOTE_ACTION",
         note,
         index,
       })
@@ -366,14 +367,14 @@ const NoteView = (props: NoteProps) => {
 
   const undo = useCallback(() => {
     dispatch({
-      type: 'UNDO_ACTION',
+      type: "UNDO_ACTION",
     })
   }, [dispatch])
 
   const setIndentation = useCallback(
     (index: number, indentation: number) => {
       dispatch({
-        type: 'INDENTATION_ACTION',
+        type: "INDENTATION_ACTION",
         index,
         indentation,
       })
@@ -384,9 +385,9 @@ const NoteView = (props: NoteProps) => {
   const saveThroughApi = async () => {
     setOngoingSaves((os) => os + 1)
     await fetch(`${getServerUrl()}/api/note/${noteId}/save`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(noteState.notes),
-      credentials: 'same-origin',
+      credentials: "same-origin",
     })
     setOngoingSaves((os) => os - 1)
   }
@@ -417,35 +418,35 @@ const NoteView = (props: NoteProps) => {
   }, [noteState.lastUserAction, saveThroughWebsocket])
 
   return (
-    <div style={{ display: 'flex', width: '100vw', maxWidth: '100%', height: '100%' }}>
+    <div style={{ display: "flex", width: "100vw", maxWidth: "100%", height: "100%" }}>
       <Head>
         <title>{noteId}</title>
       </Head>
       <div
         style={{
-          display: 'flex',
-          flex: '1 0 auto',
-          flexDirection: 'column',
-          maxWidth: '500px',
-          margin: '0 auto',
+          display: "flex",
+          flex: "1 0 auto",
+          flexDirection: "column",
+          maxWidth: "500px",
+          margin: "0 auto",
         }}
       >
         {error !== undefined && (
           <div
             style={{
-              position: 'fixed',
-              width: '100%',
-              maxWidth: '500px',
-              fontSize: '2em',
-              textAlign: 'center',
-              background: 'red',
+              position: "fixed",
+              width: "100%",
+              maxWidth: "500px",
+              fontSize: "2em",
+              textAlign: "center",
+              background: "red",
             }}
           >
             {error}
           </div>
         )}
-        <div style={{ fontSize: '2em', textAlign: 'center', margin: '10px 0' }}>{noteId}</div>
-        <div style={{ flex: '1 0 0', overflowY: 'auto' }}>
+        <div style={{ fontSize: "2em", textAlign: "center", margin: "10px 0" }}>{noteId}</div>
+        <div style={{ flex: "1 0 0", overflowY: "auto" }}>
           {noteState.notes.map((note, index) => (
             <NoteRow
               key={note.id}
@@ -462,32 +463,32 @@ const NoteView = (props: NoteProps) => {
             />
           ))}
         </div>
-        <footer style={{ display: 'flex', flex: '0 0 auto', marginBottom: '1px' }}>
+        <footer style={{ display: "flex", flex: "0 0 auto", marginBottom: "1px" }}>
           <Button
-            style={{ flex: '1 0 0', height: '50px' }}
+            style={{ flex: "1 0 0", height: "50px" }}
             onClick={() => {
               const indentation = noteState.notes[noteState.notes.length - 1]?.indentation ?? 0
-              addNote(noteState.notes.length, '', false, indentation)
+              addNote(noteState.notes.length, "", false, indentation)
             }}
             disabled={error !== undefined}
           >
             Add
           </Button>
           <Button
-            style={{ flex: '1 0 0', height: '50px' }}
+            style={{ flex: "1 0 0", height: "50px" }}
             onClick={undo}
             disabled={noteState.history.length === 0 || error !== undefined}
           >
             Undo
           </Button>
           <Button
-            style={{ flex: '1 0 0', height: '50px' }}
+            style={{ flex: "1 0 0", height: "50px" }}
             onClick={saveThroughApi}
             disabled={error !== undefined}
           >
-            <span style={{ paddingRight: '5px' }}>Save</span>
-            {ongoingSaves > 0 && <LoadIcon style={{ width: '16px' }} />}
-            {ongoingSaves === 0 && <Check style={{ width: '16px' }} />}
+            <span style={{ paddingRight: "5px" }}>Save</span>
+            {ongoingSaves > 0 && <LoadIcon style={{ width: "16px" }} />}
+            {ongoingSaves === 0 && <Check style={{ width: "16px" }} />}
           </Button>
         </footer>
       </div>

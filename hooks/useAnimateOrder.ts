@@ -1,5 +1,6 @@
-import { RefObject, useLayoutEffect } from 'react'
-import usePrevious from './usePrevious'
+import { RefObject, useLayoutEffect } from "react"
+
+import usePrevious from "./usePrevious"
 
 export default function useAnimateOrder(index: number, ref: RefObject<HTMLElement>) {
   const prevIndex = usePrevious(index)
@@ -14,11 +15,11 @@ export default function useAnimateOrder(index: number, ref: RefObject<HTMLElemen
       requestAnimationFrame(() => {
         const changeY = top - newTop
         refCurrent.style.transform = `translateY(${changeY}px)`
-        refCurrent.style.transition = 'transform 0s'
+        refCurrent.style.transition = "transform 0s"
         requestAnimationFrame(() => {
           // And on the next frame, remove the transistion to play the animation
-          refCurrent.style.transform = ''
-          refCurrent.style.transition = 'transform 300ms'
+          refCurrent.style.transform = ""
+          refCurrent.style.transition = "transform 300ms"
         })
       })
     }

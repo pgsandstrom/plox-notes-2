@@ -2,10 +2,6 @@ export type Dictionary<K extends string | number | symbol, V> = {
   [key in K]: V
 }
 
-export type PartialDict<K extends string | number | symbol, V> = {
-  [key in K]?: V
-}
-
 // old notes might not have indentation on them. I could fix some kind of migration script to adress this.
 export interface NoteDb {
   id: string

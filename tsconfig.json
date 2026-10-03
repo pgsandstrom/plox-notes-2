@@ -2,14 +2,13 @@
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": ".",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "lib": ["dom", "es2017"],
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -22,6 +21,6 @@
     "target": "esnext",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "oxlint.config.mts"],
   "exclude": ["dist", ".next", "out", "next.config.js", "node_modules"]
 }
