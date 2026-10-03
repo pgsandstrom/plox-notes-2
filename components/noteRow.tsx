@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef } from "react"
+import { RefObject, useEffect, useRef } from "react"
 import React from "react"
 import TextareaAutosize from "react-textarea-autosize"
 
@@ -17,7 +17,7 @@ interface NoteRowProps {
   previousNote?: Note
   note: Note
   index: number
-  gainFocusRef: MutableRefObject<FocusGain | undefined>
+  gainFocusRef: RefObject<FocusGain | undefined>
   disabled: boolean
   checkNote: (checked: boolean, index: number) => void
   editNote: (note: Note, index: number) => void

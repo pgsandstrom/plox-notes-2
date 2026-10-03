@@ -1,7 +1,8 @@
 import Link from "next/link"
-import { MutableRefObject, forwardRef, useEffect, useRef } from "react"
+import { RefObject, useEffect, useRef } from "react"
 import TextareaAutosize from "react-textarea-autosize"
 
+import useAnimateOrder from "../hooks/useAnimateOrder"
 import { FocusGain } from "../pages/[note]"
 import { NoteMeta } from "../types"
 import Button from "./button"
@@ -11,7 +12,7 @@ interface NoteRowProps {
   previousNote?: NoteMeta
   note: NoteMeta
   index: number
-  gainFocusRef: MutableRefObject<FocusGain | undefined>
+  gainFocusRef: RefObject<FocusGain | undefined>
   disabled: boolean
   editNote: (note: NoteMeta, index: number) => void
   deleteNote: (index: number) => void
@@ -23,98 +24,95 @@ interface NoteRowProps {
 // Maybe it could be written a bit better to fix DRY.
 // But I dont think it is worth the effort.
 
-const NoteMetaRow = forwardRef<HTMLDivElement, NoteRowProps>(
-  (
-    {
-      previousNote,
-      note,
-      index,
-      gainFocusRef,
-      disabled,
-      editNote,
-      deleteNote,
-      setSpecificFocus,
-      isEditing,
-    }: NoteRowProps,
-    ref,
-  ) => {
-    const inputRef = useRef<HTMLTextAreaElement>(null)
+const NoteMetaRow = ({
+  previousNote,
+  note,
+  index,
+  gainFocusRef,
+  disabled,
+  editNote,
+  deleteNote,
+  setSpecificFocus,
+  isEditing,
+}: NoteRowProps) => {
+  const ref = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+  useAnimateOrder(index, ref)
 
-    // Currently when deleting a row with keyboard presses on mobile the keyboard flickers.
-    // I have tried moving focus gaining to before deleting rows, but it results in weird bugs on mobile.
-    // Since debugging stuff like that is super frustrating on mobile, I have given up on fixing this.
-    const gainFocus = gainFocusRef.current
-    useEffect(() => {
-      const inputElement = inputRef.current
-      if (gainFocus?.index === index && inputElement) {
-        const inputLength = inputElement.value.length
-        const selectionPosition: number =
-          gainFocus.position === "end"
-            ? inputLength
-            : gainFocus.position === "start"
-              ? 0
-              : gainFocus.position
-        inputElement.selectionStart = selectionPosition
-        inputElement.selectionEnd = selectionPosition
-        inputElement.focus()
-        gainFocusRef.current = undefined
-      }
-    }, [index, gainFocus, gainFocusRef])
-
-    if (!isEditing) {
-      // TODO centering all of these more could be nice. Maybe just move this to its own component.
-      return (
-        <>
-          <div className="note-row" style={{ marginBottom: "20px", marginLeft: "20px" }}>
-            <Link href={`/${note.text}`}>{note.text}</Link>
-          </div>
-          {getStyle()}
-        </>
-      )
+  // Currently when deleting a row with keyboard presses on mobile the keyboard flickers.
+  // I have tried moving focus gaining to before deleting rows, but it results in weird bugs on mobile.
+  // Since debugging stuff like that is super frustrating on mobile, I have given up on fixing this.
+  const gainFocus = gainFocusRef.current
+  useEffect(() => {
+    const inputElement = inputRef.current
+    if (gainFocus?.index === index && inputElement) {
+      const inputLength = inputElement.value.length
+      const selectionPosition: number =
+        gainFocus.position === "end"
+          ? inputLength
+          : gainFocus.position === "start"
+            ? 0
+            : gainFocus.position
+      inputElement.selectionStart = selectionPosition
+      inputElement.selectionEnd = selectionPosition
+      inputElement.focus()
+      gainFocusRef.current = undefined
     }
+  }, [index, gainFocus, gainFocusRef])
 
-    // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
-    // But resolve does not seem to be bundled with nextjs. Find a neat solution.
+  if (!isEditing) {
+    // TODO centering all of these more could be nice. Maybe just move this to its own component.
     return (
-      <div key={note.id} ref={ref} className="note-row">
-        <TextareaAutosize
-          className="note-row-input"
-          value={note.text}
-          onChange={(e) => {
-            editNote({ ...note, text: e.target.value }, index)
-          }}
-          onKeyDown={(e) => {
-            const inputElement = inputRef.current
-            if (
-              e.key === "Backspace" &&
-              inputElement?.selectionStart === 0 &&
-              inputElement.selectionEnd === 0
-            ) {
-              e.preventDefault()
-              deleteNote(index)
-              if (previousNote) {
-                editNote(
-                  {
-                    ...previousNote,
-                    text: `${previousNote.text}${note.text}`,
-                  },
-                  index - 1,
-                )
-                setSpecificFocus(index - 1, previousNote.text.length)
-              }
-            }
-          }}
-          disabled={disabled}
-          ref={inputRef}
-        />
-        <Button onClick={() => deleteNote(index)} style={{ height: "32px", marginTop: "-4px" }}>
-          <Cross style={{ marginTop: "8px", width: "16px" }} />
-        </Button>
+      <>
+        <div ref={ref} className="note-row" style={{ marginBottom: "20px", marginLeft: "20px" }}>
+          <Link href={`/${note.text}`}>{note.text}</Link>
+        </div>
         {getStyle()}
-      </div>
+      </>
     )
-  },
-)
+  }
+
+  // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
+  // But resolve does not seem to be bundled with nextjs. Find a neat solution.
+  return (
+    <div key={note.id} ref={ref} className="note-row">
+      <TextareaAutosize
+        className="note-row-input"
+        value={note.text}
+        onChange={(e) => {
+          editNote({ ...note, text: e.target.value }, index)
+        }}
+        onKeyDown={(e) => {
+          const inputElement = inputRef.current
+          if (
+            e.key === "Backspace" &&
+            inputElement?.selectionStart === 0 &&
+            inputElement.selectionEnd === 0
+          ) {
+            e.preventDefault()
+            deleteNote(index)
+            if (previousNote) {
+              editNote(
+                {
+                  ...previousNote,
+                  text: `${previousNote.text}${note.text}`,
+                },
+                index - 1,
+              )
+              setSpecificFocus(index - 1, previousNote.text.length)
+            }
+          }
+        }}
+        disabled={disabled}
+        ref={inputRef}
+      />
+      <Button onClick={() => deleteNote(index)} style={{ height: "32px", marginTop: "-4px" }}>
+        <Cross style={{ marginTop: "8px", width: "16px" }} />
+      </Button>
+      {getStyle()}
+    </div>
+  )
+}
 
 const getStyle = () => (
   <style jsx global>{`

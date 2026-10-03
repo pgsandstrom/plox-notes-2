@@ -2,7 +2,6 @@ import { GetServerSideProps } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
 import { useReducer, useRef, useState } from "react"
-import FlipMove from "react-flip-move"
 import { v4 as uuidv4 } from "uuid"
 
 import Button from "../../components/button"
@@ -253,11 +252,7 @@ const NoteMetaView = (props: NoteMetaProps) => {
           </div>
         )}
         <div style={{ fontSize: "2em", textAlign: "center", margin: "10px 0" }}>{noteMetaId}</div>
-        <FlipMove
-          duration={200}
-          style={{ flex: "1 0 0", overflowY: "auto" }}
-          leaveAnimation={false}
-        >
+        <div style={{ flex: "1 0 0", overflowY: "auto" }}>
           {noteState.metaList.map((noteMeta, index) => (
             <NoteMetaRow
               key={noteMeta.id}
@@ -272,7 +267,7 @@ const NoteMetaView = (props: NoteMetaProps) => {
               isEditing={editing}
             />
           ))}
-        </FlipMove>
+        </div>
         <footer style={{ display: "flex", flex: "0 0 auto", marginBottom: "1px" }}>
           {(editing || ongoingSaves > 0) && (
             <>

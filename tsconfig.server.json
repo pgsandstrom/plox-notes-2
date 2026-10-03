@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "isolatedModules": false,
-    "module": "commonjs",
-    "moduleResolution": "node10",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "noEmit": false,
     "outDir": "dist",
     "target": "es2017"

@@ -20,7 +20,7 @@ export default function useWebsocket(
   // hooks are only skipped during SSR, so the call order is stable on the client
   /* oxlint-disable @eslint-react/rules-of-hooks */
 
-  const socketRef = useRef<Socket>()
+  const socketRef = useRef<Socket>(undefined)
 
   if (socketRef.current === undefined) {
     const socket: Socket = socketio(getServerUrl(), {

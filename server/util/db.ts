@@ -52,9 +52,9 @@ export const querySingleString = async <T extends QueryResultRow = any>(
 }
 
 const getSingle = <T extends QueryResultRow>(result: QueryResult<T>): T | undefined => {
-  if (result.rowCount > 1) {
-    throw new Error(`Unexpected number of rows: ${result.rowCount}`)
-  } else if (result.rowCount === 0) {
+  if (result.rows.length > 1) {
+    throw new Error(`Unexpected number of rows: ${result.rows.length}`)
+  } else if (result.rows.length === 0) {
     return undefined
   } else {
     return result.rows[0]

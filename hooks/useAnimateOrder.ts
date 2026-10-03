@@ -2,7 +2,7 @@ import { RefObject, useLayoutEffect } from "react"
 
 import usePrevious from "./usePrevious"
 
-export default function useAnimateOrder(index: number, ref: RefObject<HTMLElement>) {
+export default function useAnimateOrder(index: number, ref: RefObject<HTMLElement | null>) {
   const prevIndex = usePrevious(index)
 
   const refCurrent = ref.current
