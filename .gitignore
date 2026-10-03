@@ -5,9 +5,6 @@
 /.next/
 next-env.d.ts
 
-# old server build output, no longer produced
-/dist
-
 # typescript
 *.tsbuildinfo
 

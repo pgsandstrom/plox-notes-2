@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "short_name": "",
+  "name": "PloxNotes",
+  "short_name": "PloxNotes",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",

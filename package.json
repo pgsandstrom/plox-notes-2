@@ -1,13 +1,11 @@
 {
   "name": "plox-notes-2",
-  "version": "1.0.0",
-  "private": false,
+  "private": true,
   "type": "module",
   "scripts": {
     "build": "next build",
-    "dev": "node --watch-path=server --watch-path=types server/index.ts",
+    "dev": "PGPORT=${PGPORT:-5433} node --watch-path=server --watch-path=types server/index.ts",
     "dev-database": "docker compose -f docker-compose-dev.yml up -d",
-    "dev-database-build": "docker compose -f docker-compose-dev.yml build",
     "docker-build": "docker compose build --no-cache",
     "docker-up": "docker compose up -d",
     "format": "oxfmt",

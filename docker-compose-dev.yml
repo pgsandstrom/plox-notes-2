@@ -1,10 +1,13 @@
-# Here we expose the ports so we can connect from our dev instance on our local machine
+# Dev database only. It has its own project name so it never shares the container or volume
+# with the production compose file, and it uses port 5433 so it does not collide with
+# other projects running postgres on the default port. `pnpm dev` uses the same port.
+name: plox-notes-2-dev
 services:
   db:
     extends:
       file: docker-compose.yml
       service: db
     ports:
-      - "5432:5432"
+      - "${PGPORT:-5433}:5432"
 volumes:
   db:

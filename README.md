@@ -10,7 +10,7 @@ This project is a bit shit codewise and have not received any love for several y
 
 ## Getting Started
 
-To start dev mode, start the database in docker and then the dev server:
+You need Node 24, pnpm and Docker.
 
 ```bash
 pnpm install
@@ -18,7 +18,15 @@ pnpm dev-database
 pnpm dev
 ```
 
-The server connects to postgres on localhost:5432. Set `PGHOST`/`PGPORT` to point it somewhere else.
+Then open http://localhost:3000.
+
+`pnpm dev-database` starts Postgres 16 in a docker container in the background, on localhost:5433 (not the default 5432, so it does not collide with other projects). The first time it starts, it creates the `ploxnotes` database and runs `db/create-tables.sql`. The data is kept in a docker volume, so it survives restarts. You only need to run it again after a reboot or after stopping it.
+
+`pnpm dev` starts the custom server with Next.js in dev mode and connects to the database on port 5433. It restarts by itself when something in `server/` or `types/` changes.
+
+To use another port, set `PGPORT` for both commands, e.g. `PGPORT=5555 pnpm dev-database` and `PGPORT=5555 pnpm dev`.
+
+To stop the database: `docker compose -f docker-compose-dev.yml down`. Add `-v` to also delete the data.
 
 Before pushing, `pnpm validate` runs typecheck and lint, and `pnpm knip` finds unused files, exports and dependencies.
 
