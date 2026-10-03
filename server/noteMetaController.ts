@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid"
 
-import { NoteMeta } from "../types"
-import { SQL, query, querySingle } from "./util/db"
+import type { NoteMeta } from "../types/index.ts"
+import { SQL, query, querySingle } from "./util/db.ts"
 
 export const loadOrShowNewMeta = async (id: string) => {
   const queryResult = await loadMeta(id)

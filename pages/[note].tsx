@@ -1,18 +1,17 @@
-import { GetServerSideProps } from "next"
+import type { GetServerSideProps } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
 import { useCallback, useEffect, useReducer, useRef, useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 
-import Button from "../components/button"
-import { Check, LoadIcon } from "../components/icons"
-import NoteRow from "../components/noteRow"
-import usePrevious from "../hooks/usePrevious"
-import useWebsocket from "../hooks/useWebsocket"
-import { loadOrShowNewNote } from "../server/noteController"
-import getServerUrl from "../server/util/serverUrl"
-import { WEBSOCKET_COMMAND } from "../server/websocketConstants"
-import { Note, NotePost } from "../types"
+import Button from "../components/button.tsx"
+import { Check, LoadIcon } from "../components/icons.tsx"
+import NoteRow from "../components/noteRow.tsx"
+import usePrevious from "../hooks/usePrevious.ts"
+import useWebsocket from "../hooks/useWebsocket.ts"
+import { loadOrShowNewNote } from "../server/noteController.ts"
+import { WEBSOCKET_COMMAND } from "../server/websocketConstants.ts"
+import type { Note, NotePost } from "../types/index.ts"
 
 interface NoteProps {
   notes: Note[]
@@ -384,10 +383,9 @@ const NoteView = (props: NoteProps) => {
 
   const saveThroughApi = async () => {
     setOngoingSaves((os) => os + 1)
-    await fetch(`${getServerUrl()}/api/note/${noteId}/save`, {
+    await fetch(`/api/note/${noteId}/save`, {
       method: "POST",
       body: JSON.stringify(noteState.notes),
-      credentials: "same-origin",
     })
     setOngoingSaves((os) => os - 1)
   }

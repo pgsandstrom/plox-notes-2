@@ -129,10 +129,6 @@ export default defineConfig({
         "prefer-spread": "error",
       },
     },
-    {
-      files: ["*.config.js"],
-      env: { node: true },
-    },
   ],
 })
 

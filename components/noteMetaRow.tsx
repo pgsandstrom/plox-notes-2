@@ -1,12 +1,13 @@
 import Link from "next/link"
-import { RefObject, useEffect, useRef } from "react"
+import type { RefObject } from "react"
+import { useEffect, useRef } from "react"
 import TextareaAutosize from "react-textarea-autosize"
 
-import useAnimateOrder from "../hooks/useAnimateOrder"
-import { FocusGain } from "../pages/[note]"
-import { NoteMeta } from "../types"
-import Button from "./button"
-import { Cross } from "./icons"
+import useAnimateOrder from "../hooks/useAnimateOrder.ts"
+import type { FocusGain } from "../pages/[note].tsx"
+import type { NoteMeta } from "../types/index.ts"
+import Button from "./button.tsx"
+import { Cross } from "./icons.tsx"
 
 interface NoteRowProps {
   previousNote?: NoteMeta

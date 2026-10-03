@@ -1,9 +1,9 @@
 // import { save, load } from './controller/note';
-import socketio from "socket.io"
+import type socketio from "socket.io"
 
-import { NotePost } from "../types"
-import { loadNote, saveNote } from "./noteController"
-import { WEBSOCKET_COMMAND } from "./websocketConstants"
+import type { NotePost } from "../types/index.ts"
+import { loadNote, saveNote } from "./noteController.ts"
+import { WEBSOCKET_COMMAND } from "./websocketConstants.ts"
 
 interface NoteConnection {
   noteId: string

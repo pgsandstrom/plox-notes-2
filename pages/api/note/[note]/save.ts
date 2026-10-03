@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next"
+import type { NextApiRequest, NextApiResponse } from "next"
 
-import { saveNote } from "../../../../server/noteController"
-import { Note } from "../../../../types"
+import { saveNote } from "../../../../server/noteController.ts"
+import type { Note } from "../../../../types/index.ts"
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const noteid = req.query.note as string

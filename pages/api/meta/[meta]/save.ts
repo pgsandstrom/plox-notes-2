@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next"
+import type { NextApiRequest, NextApiResponse } from "next"
 
-import { saveMeta } from "../../../../server/noteMetaController"
-import { Note } from "../../../../types"
+import { saveMeta } from "../../../../server/noteMetaController.ts"
+import type { Note } from "../../../../types/index.ts"
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const noteid = req.query.meta as string

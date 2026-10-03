@@ -1,9 +1,10 @@
-version: "3.8"
 services:
   web:
     build: .
     ports:
       - "8088:3000"
+    environment:
+      - PGHOST=db
     restart: always
   db:
     image: postgres:16

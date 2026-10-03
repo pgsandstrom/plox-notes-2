@@ -30,9 +30,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/package.json /app/next.config.js ./
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
+# node runs the custom server's typescript directly, so it ships as source
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/types ./types
 
 EXPOSE 3000
 
-CMD ["node", "dist/server/index.js"]
+CMD ["node", "server/index.ts"]

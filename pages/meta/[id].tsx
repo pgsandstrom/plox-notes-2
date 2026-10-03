@@ -1,16 +1,15 @@
-import { GetServerSideProps } from "next"
+import type { GetServerSideProps } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
 import { useReducer, useRef, useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 
-import Button from "../../components/button"
-import { Check, LoadIcon } from "../../components/icons"
-import NoteMetaRow from "../../components/noteMetaRow"
-import { loadOrShowNewMeta } from "../../server/noteMetaController"
-import getServerUrl from "../../server/util/serverUrl"
-import { NoteMeta } from "../../types"
-import { FocusGain } from "../[note]"
+import Button from "../../components/button.tsx"
+import { Check, LoadIcon } from "../../components/icons.tsx"
+import NoteMetaRow from "../../components/noteMetaRow.tsx"
+import { loadOrShowNewMeta } from "../../server/noteMetaController.ts"
+import type { NoteMeta } from "../../types/index.ts"
+import type { FocusGain } from "../[note].tsx"
 
 interface NoteMetaProps {
   metaList: NoteMeta[]
@@ -205,10 +204,9 @@ const NoteMetaView = (props: NoteMetaProps) => {
     setOngoingSaves((os) => os + 1)
     setEditing(false)
     try {
-      const result = await fetch(`${getServerUrl()}/api/meta/${noteMetaId}/save`, {
+      const result = await fetch(`/api/meta/${noteMetaId}/save`, {
         method: "POST",
         body: JSON.stringify(noteState.metaList),
-        credentials: "same-origin",
       })
       if (result.status >= 200 && result.status < 300) {
         setError(undefined)

@@ -1,6 +1,7 @@
-import { RefObject, useLayoutEffect } from "react"
+import type { RefObject } from "react"
+import { useLayoutEffect } from "react"
 
-import usePrevious from "./usePrevious"
+import usePrevious from "./usePrevious.ts"
 
 export default function useAnimateOrder(index: number, ref: RefObject<HTMLElement | null>) {
   const prevIndex = usePrevious(index)

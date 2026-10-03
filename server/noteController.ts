@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid"
 
-import { Note, NoteDb } from "../types"
-import { SQL, query, querySingle } from "./util/db"
+import type { Note, NoteDb } from "../types/index.ts"
+import { SQL, query, querySingle } from "./util/db.ts"
 
 export const loadOrShowNewNote = async (id: string): Promise<Note[]> => {
   const queryResult = await loadNote(id)

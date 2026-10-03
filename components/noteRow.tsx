@@ -1,14 +1,14 @@
-import { RefObject, useEffect, useRef } from "react"
-import React from "react"
+import type { RefObject } from "react"
+import { memo, useEffect, useRef } from "react"
 import TextareaAutosize from "react-textarea-autosize"
 
-import useAnimateOrder from "../hooks/useAnimateOrder"
-import useKey from "../hooks/useKey"
-import { FocusGain } from "../pages/[note]"
-import { Note } from "../types"
-import Button from "./button"
-import Checkbox from "./checkbox"
-import { Cross } from "./icons"
+import useAnimateOrder from "../hooks/useAnimateOrder.ts"
+import useKey from "../hooks/useKey.ts"
+import type { FocusGain } from "../pages/[note].tsx"
+import type { Note } from "../types/index.ts"
+import Button from "./button.tsx"
+import Checkbox from "./checkbox.tsx"
+import { Cross } from "./icons.tsx"
 
 const SWIPE_INDENTATION_LIMIT = 30
 const SWIPE_MAX_Y_DIFF = 25
@@ -230,6 +230,6 @@ const isPropsEqual = (prev: NoteRowProps, next: NoteRowProps) => {
   )
 }
 
-export default React.memo(NoteRow, isPropsEqual)
+export default memo(NoteRow, isPropsEqual)
 
 // export default NoteRow

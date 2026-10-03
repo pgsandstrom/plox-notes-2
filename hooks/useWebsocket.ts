@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef } from "react"
-import socketio, { Socket } from "socket.io-client"
+import type { Socket } from "socket.io-client"
+import socketio from "socket.io-client"
 
-import getServerUrl from "../server/util/serverUrl"
-import { WEBSOCKET_COMMAND } from "../server/websocketConstants"
-import { Note, NotePost } from "../types"
+import { WEBSOCKET_COMMAND } from "../server/websocketConstants.ts"
+import type { Note, NotePost } from "../types/index.ts"
 
 // TODO we could really have a better type system for sending stuff through the websocket.
 export default function useWebsocket(
@@ -23,7 +23,7 @@ export default function useWebsocket(
   const socketRef = useRef<Socket>(undefined)
 
   if (socketRef.current === undefined) {
-    const socket: Socket = socketio(getServerUrl(), {
+    const socket: Socket = socketio({
       reconnectionDelay: 300,
       reconnectionDelayMax: 1500,
     })
@@ -34,9 +34,6 @@ export default function useWebsocket(
     })
     socket.on("connect_error", () => {
       setError("Connect error")
-    })
-    socket.on("connect_timeout", () => {
-      setError("Connect timeout")
     })
     socket.on(WEBSOCKET_COMMAND.LOAD, (data: NotePost) => {
       setNotes(data.notes)
@@ -50,14 +47,11 @@ export default function useWebsocket(
     socket.on("disconnect", () => {
       setError("Disconnected")
     })
-    socket.on("error", (errorObj: any) => {
-      setError("Connect error")
-      console.log(`error: ${JSON.stringify(errorObj)}`)
-    })
-    socket.on("reconnect_error", (_errorObj: any) => {
+    // reconnection events are emitted by the manager, not the socket
+    socket.io.on("reconnect_error", () => {
       setError("Reconnect error")
     })
-    socket.on("reconnect_failed", (_errorObj: any) => {
+    socket.io.on("reconnect_failed", () => {
       setError("Reconnect failed")
     })
   }

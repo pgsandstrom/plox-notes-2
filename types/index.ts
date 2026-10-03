@@ -1,7 +1,3 @@
-export type Dictionary<K extends string | number | symbol, V> = {
-  [key in K]: V
-}
-
 // old notes might not have indentation on them. I could fix some kind of migration script to adress this.
 export interface NoteDb {
   id: string
@@ -25,9 +21,4 @@ export interface NotePost {
 export interface NoteMeta {
   id: string
   text: string
-}
-
-export interface NoteMetaPost {
-  id: string
-  metaList: NoteMeta[]
 }

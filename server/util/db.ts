@@ -1,4 +1,5 @@
-import { Pool, PoolClient, QueryConfig, QueryResult, QueryResultRow, types } from "pg"
+import type { QueryConfig, QueryResult, QueryResultRow } from "pg"
+import { Pool, types } from "pg"
 
 // warning: null returning instead of undefined from database might screw us. Can we transform all null to undefined?
 
@@ -10,44 +11,22 @@ types.setTypeParser(20, (val: string) => {
 
 let dbPool: Pool | undefined
 
+// host and port come from PGHOST/PGPORT, defaulting to localhost:5432. docker-compose sets PGHOST=db.
 const getDbPool = () => {
-  if (dbPool === undefined) {
-    const dev = process.env.NODE_ENV !== "production"
-    if (dev) {
-      dbPool = new Pool({
-        host: "localhost",
-        database: "ploxnotes",
-        user: "postgres",
-        password: "postgres",
-      })
-    } else {
-      dbPool = new Pool({
-        host: "db",
-        database: "ploxnotes",
-        user: "postgres",
-        password: "postgres",
-      })
-    }
-  }
+  dbPool ??= new Pool({
+    database: "ploxnotes",
+    user: "postgres",
+    password: "postgres",
+  })
   return dbPool
 }
 
 // Use this for single query
 export const query = <T extends QueryResultRow = any>(stuff: QueryConfig) =>
   getDbPool().query<T>(stuff)
-export const queryString = <T extends QueryResultRow = any>(stuff: string, values?: any[]) =>
-  getDbPool().query<T>(stuff, values)
 
 export const querySingle = async <T extends QueryResultRow = any>(stuff: QueryConfig) => {
   const result: QueryResult<T> = await getDbPool().query(stuff)
-  return getSingle<T>(result)
-}
-
-export const querySingleString = async <T extends QueryResultRow = any>(
-  stuff: string,
-  values?: any[],
-) => {
-  const result: QueryResult<T> = await getDbPool().query<T>(stuff, values)
   return getSingle<T>(result)
 }
 
@@ -59,11 +38,6 @@ const getSingle = <T extends QueryResultRow>(result: QueryResult<T>): T | undefi
   } else {
     return result.rows[0]
   }
-}
-
-// Use this to gain a client for multiple operations, such as transactions
-export const getClient = (): Promise<PoolClient> => {
-  return getDbPool().connect()
 }
 
 export const SQL = (parts: TemplateStringsArray, ...values: any[]): QueryConfig => ({

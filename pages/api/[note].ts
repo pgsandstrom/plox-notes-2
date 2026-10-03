@@ -1,6 +1,6 @@
-import { NextApiRequest, NextApiResponse } from "next"
+import type { NextApiRequest, NextApiResponse } from "next"
 
-import { loadOrShowNewNote } from "../../server/noteController"
+import { loadOrShowNewNote } from "../../server/noteController.ts"
 
 // This currently isn't used. We only retrieve data through SSR or websocket.
 export default async (req: NextApiRequest, res: NextApiResponse) => {

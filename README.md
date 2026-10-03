@@ -10,12 +10,17 @@ This project is a bit shit codewise and have not received any love for several y
 
 ## Getting Started
 
-To start dev mode:
+To start dev mode, start the database in docker and then the dev server:
 
 ```bash
 pnpm install
+pnpm dev-database
 pnpm dev
 ```
+
+The server connects to postgres on localhost:5432. Set `PGHOST`/`PGPORT` to point it somewhere else.
+
+Before pushing, `pnpm validate` runs typecheck and lint, and `pnpm knip` finds unused files, exports and dependencies.
 
 ## release
 
