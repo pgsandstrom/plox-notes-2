@@ -9,7 +9,6 @@ export default function useWebsocket(
   noteId: string,
   setError: (error?: string) => void,
   setNotes: (notes: Note[]) => void,
-  saveComplete: () => void,
   onConnect: () => void,
 ): (command: string, data: unknown) => void {
   const socketRef = useRef<Socket>(undefined)
@@ -18,7 +17,6 @@ export default function useWebsocket(
   const onConnectEvent = useEffectEvent(onConnect)
   const setErrorEvent = useEffectEvent(setError)
   const setNotesEvent = useEffectEvent(setNotes)
-  const saveCompleteEvent = useEffectEvent(saveComplete)
 
   // effects do not run during SSR, so the socket is only created in the browser
   useEffect(() => {
@@ -39,9 +37,6 @@ export default function useWebsocket(
     })
     socket.on(WEBSOCKET_COMMAND.SERVER_ERROR, (data: string) => {
       setErrorEvent(data)
-    })
-    socket.on("ok", () => {
-      saveCompleteEvent()
     })
     socket.on("disconnect", () => {
       setErrorEvent("Disconnected")

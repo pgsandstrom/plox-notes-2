@@ -13,7 +13,6 @@ export const loadOrShowNewMeta = async (id: string) => {
         {
           id: uuidv4(),
           text: "",
-          checked: false,
         },
       ],
     }
@@ -40,6 +39,6 @@ export const saveMeta = async (id: string, notes: NoteMeta[]) => {
 
   const queryResult =
     await query(SQL`INSERT INTO note_meta(id, data) VALUES(${id}, ${JSON.stringify(notes)})
-  ON CONFLICT(id) DO UPDATE SET data=${JSON.stringify(notes)}::jsonb`)
+  ON CONFLICT(id) DO UPDATE SET data = EXCLUDED.data`)
   return queryResult
 }

@@ -13,7 +13,7 @@ app
   .prepare()
   .then(() => {
     const server = createServer((req, res) => {
-      handle(req, res).catch(() => console.error("failed to handle request"))
+      handle(req, res).catch((e: unknown) => console.error("failed to handle request", e))
     })
 
     const ioServer = new Server(server)
@@ -25,4 +25,7 @@ app
       console.log(`> Ready on http://localhost:${port}. NODE_ENV is ${process.env.NODE_ENV}`)
     })
   })
-  .catch(() => console.error("failed to start server"))
+  .catch((e: unknown) => {
+    console.error("failed to start server", e)
+    process.exit(1)
+  })

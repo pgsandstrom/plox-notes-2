@@ -12,7 +12,7 @@ export default function Home() {
 
   const goToPage = () => {
     setIsRouting(true)
-    void router.push("/[note]", `/${id}`)
+    void router.push(`/${encodeURIComponent(id)}`)
   }
 
   return (
@@ -51,7 +51,7 @@ export default function Home() {
           <input
             value={id}
             onChange={(e) => setId(e.target.value)}
-            onKeyPress={(e) => {
+            onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault()
                 goToPage()

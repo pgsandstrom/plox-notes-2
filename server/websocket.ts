@@ -1,4 +1,3 @@
-// import { save, load } from './controller/note';
 import type socketio from "socket.io"
 
 import type { NotePost } from "../types/index.ts"
@@ -31,9 +30,8 @@ export default (io: socketio.Server) => {
             socket.emit(WEBSOCKET_COMMAND.LOAD, noteData)
           }
         })
-        // TODO send out error to client when loading or saving fails
         .catch((e: unknown) => {
-          console.error(`failed loading note ${noteId}. Error: ${JSON.stringify(e)}`)
+          console.error(`failed loading note ${noteId}`, e)
           socket.emit(WEBSOCKET_COMMAND.SERVER_ERROR, "Load error")
         })
     })
@@ -46,10 +44,9 @@ export default (io: socketio.Server) => {
             .filter(([, connection]) => connection.noteId === id) // Remove users in other notes
             .map(([, connection]) => connection.socket)
             .forEach((otherSocket) => otherSocket.emit(WEBSOCKET_COMMAND.LOAD, { id, notes }))
-          socket.emit("ok")
         })
-        .catch(() => {
-          console.error(`failed saving note ${id}`)
+        .catch((e: unknown) => {
+          console.error(`failed saving note ${id}`, e)
           socket.emit(WEBSOCKET_COMMAND.SERVER_ERROR, "Save error")
         })
     })

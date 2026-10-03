@@ -1,6 +1,8 @@
 services:
   web:
     build: .
+    # node as PID 1 ignores SIGTERM, so without an init every restart waits 10s for the kill
+    init: true
     ports:
       - "8088:3000"
     environment:

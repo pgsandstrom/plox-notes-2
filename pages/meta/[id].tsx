@@ -9,8 +9,7 @@ import { Check, LoadIcon } from "../../components/icons.tsx"
 import NoteMetaRow from "../../components/noteMetaRow.tsx"
 import useAnimateOrder from "../../hooks/useAnimateOrder.ts"
 import { loadOrShowNewMeta } from "../../server/noteMetaController.ts"
-import type { NoteMeta } from "../../types/index.ts"
-import type { FocusGain } from "../[note].tsx"
+import type { FocusGain, NoteMeta } from "../../types/index.ts"
 
 interface NoteMetaProps {
   metaList: NoteMeta[]
@@ -34,11 +33,6 @@ interface NoteMetaState {
   lastUserAction: number
 }
 
-interface SetMetaAction {
-  type: "SET_META_ACTION"
-  notes: NoteMeta[]
-}
-
 interface AddMetaAction {
   type: "ADD_META_ACTION"
   index: number
@@ -60,7 +54,14 @@ interface UndoAction {
   type: "UNDO_ACTION"
 }
 
-type MetaAction = SetMetaAction | AddMetaAction | DeleteMetaAction | EditMetaAction | UndoAction
+type MetaAction = AddMetaAction | DeleteMetaAction | EditMetaAction | UndoAction
+
+const MAX_HISTORY = 100
+
+const pushHistory = (state: NoteMetaState) => [
+  state.metaList,
+  ...state.history.slice(0, MAX_HISTORY - 1),
+]
 
 const NoteMetaView = (props: NoteMetaProps) => {
   const router = useRouter()
@@ -75,28 +76,16 @@ const NoteMetaView = (props: NoteMetaProps) => {
     position: "end",
   })
 
-  const isNotesEmpty = (notes: NoteMeta[]): boolean => {
-    return notes.length === 1 && notes[0].text === ""
-  }
-
   const [noteState, dispatch] = useReducer(
     (state: NoteMetaState, action: MetaAction): NoteMetaState => {
-      if (action.type === "SET_META_ACTION") {
-        return {
-          metaList: action.notes,
-          history: isNotesEmpty(state.metaList)
-            ? [...state.history]
-            : [state.metaList, ...state.history],
-          lastUserAction: state.lastUserAction,
-        }
-      } else if (action.type === "ADD_META_ACTION") {
+      if (action.type === "ADD_META_ACTION") {
         return {
           metaList: [
             ...state.metaList.slice(0, action.index),
             newMeta(action.text),
             ...state.metaList.slice(action.index, state.metaList.length),
           ],
-          history: [state.metaList, ...state.history],
+          history: pushHistory(state),
           lastUserAction: new Date().getTime(),
         }
       } else if (action.type === "DELETE_META_ACTION") {
@@ -105,7 +94,7 @@ const NoteMetaView = (props: NoteMetaProps) => {
             ...state.metaList.slice(0, action.index),
             ...state.metaList.slice(action.index + 1, state.metaList.length),
           ],
-          history: [state.metaList, ...state.history],
+          history: pushHistory(state),
           lastUserAction: new Date().getTime(),
         }
       } else if (action.type === "EDIT_META_ACTION") {
@@ -113,7 +102,7 @@ const NoteMetaView = (props: NoteMetaProps) => {
           metaList: state.metaList.map((note, index) =>
             index === action.index ? action.note : note,
           ),
-          history: [state.metaList, ...state.history],
+          history: pushHistory(state),
           lastUserAction: new Date().getTime(),
         }
         // oxlint-disable-next-line typescript/no-unnecessary-condition
@@ -136,13 +125,6 @@ const NoteMetaView = (props: NoteMetaProps) => {
       lastUserAction: 0,
     },
   )
-
-  // const setNotes = (notes: NoteMeta[]) => {
-  //   dispatch({
-  //     type: 'SET_META_ACTION',
-  //     notes,
-  //   })
-  // }
 
   const addNote = (index: number, text?: string) => {
     dispatch({
@@ -260,7 +242,6 @@ const NoteMetaView = (props: NoteMetaProps) => {
               note={noteMeta}
               index={index}
               gainFocusRef={gainFocusRef}
-              disabled={false}
               editNote={editNote}
               deleteNote={deleteNote}
               setSpecificFocus={setSpecificFocus}

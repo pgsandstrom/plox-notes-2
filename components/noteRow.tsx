@@ -3,8 +3,7 @@ import { memo, useEffect, useRef } from "react"
 import TextareaAutosize from "react-textarea-autosize"
 
 import useKey from "../hooks/useKey.ts"
-import type { FocusGain } from "../pages/[note].tsx"
-import type { Note } from "../types/index.ts"
+import type { FocusGain, Note } from "../types/index.ts"
 import Button from "./button.tsx"
 import Checkbox from "./checkbox.tsx"
 import { Cross } from "./icons.tsx"
@@ -195,5 +194,3 @@ const isPropsEqual = (prev: NoteRowProps, next: NoteRowProps) => {
 }
 
 export default memo(NoteRow, isPropsEqual)
-
-// export default NoteRow

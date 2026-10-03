@@ -5,13 +5,13 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 
 import Button from "../components/button.tsx"
-import { Check, LoadIcon } from "../components/icons.tsx"
+import { Check, Cross, LoadIcon } from "../components/icons.tsx"
 import NoteRow from "../components/noteRow.tsx"
 import useAnimateOrder from "../hooks/useAnimateOrder.ts"
 import useWebsocket from "../hooks/useWebsocket.ts"
 import { loadOrShowNewNote } from "../server/noteController.ts"
 import { WEBSOCKET_COMMAND } from "../server/websocketConstants.ts"
-import type { Note, NotePost } from "../types/index.ts"
+import type { FocusGain, Note, NotePost } from "../types/index.ts"
 
 interface NoteProps {
   notes: Note[]
@@ -86,28 +86,29 @@ type NoteAction =
   | UndoAction
   | SetIndentationAction
 
-export interface FocusGain {
-  index: number
-  position: "start" | "end" | number
-}
-
 const isNotesIdentical = (notes1: Note[], notes2: Note[]) => {
   if (notes1.length !== notes2.length) {
     return false
   }
   return notes1.every((note, index) => {
     const otherNote = notes2[index]
-    return note.checked === otherNote.checked && note.text === otherNote.text
+    return (
+      note.checked === otherNote.checked &&
+      note.text === otherNote.text &&
+      note.indentation === otherNote.indentation
+    )
   })
 }
+
+const MAX_HISTORY = 100
+
+const pushHistory = (state: NoteState) => [state.notes, ...state.history.slice(0, MAX_HISTORY - 1)]
 
 const noteReducer = (state: NoteState, action: NoteAction): NoteState => {
   if (action.type === "SET_NOTE_ACTION") {
     return {
       notes: action.notes,
-      history: isNotesIdentical(state.notes, action.notes)
-        ? [...state.history]
-        : [state.notes, ...state.history],
+      history: isNotesIdentical(state.notes, action.notes) ? state.history : pushHistory(state),
       lastUserAction: state.lastUserAction,
     }
   } else if (action.type === "ADD_NOTE_ACTION") {
@@ -118,7 +119,7 @@ const noteReducer = (state: NoteState, action: NoteAction): NoteState => {
         createNewNote(checked, action.text, action.indentation),
         ...state.notes.slice(action.index, state.notes.length),
       ],
-      history: [state.notes, ...state.history],
+      history: pushHistory(state),
       lastUserAction: new Date().getTime(),
     }
   } else if (action.type === "DELETE_NOTE_ACTION") {
@@ -127,7 +128,7 @@ const noteReducer = (state: NoteState, action: NoteAction): NoteState => {
         ...state.notes.slice(0, action.index),
         ...state.notes.slice(action.index + 1, state.notes.length),
       ],
-      history: [state.notes, ...state.history],
+      history: pushHistory(state),
       lastUserAction: new Date().getTime(),
     }
   } else if (action.type === "EDIT_NOTE_ACTION") {
@@ -165,7 +166,7 @@ const noteReducer = (state: NoteState, action: NoteAction): NoteState => {
 
     return {
       notes: newNotes,
-      history: [state.notes, ...state.history],
+      history: pushHistory(state),
       lastUserAction: new Date().getTime(),
     }
   } else if (action.type === "CHECK_NOTE_ACTION") {
@@ -235,7 +236,7 @@ const noteReducer = (state: NoteState, action: NoteAction): NoteState => {
 
     return {
       notes: newNotes,
-      history: [state.notes, ...state.history],
+      history: pushHistory(state),
       lastUserAction: new Date().getTime(),
     }
   } else if (action.type === "UNDO_ACTION") {
@@ -253,7 +254,7 @@ const noteReducer = (state: NoteState, action: NoteAction): NoteState => {
       notes: state.notes.map((note, index) => {
         return index === action.index ? { ...note, indentation: action.indentation } : note
       }),
-      history: [state.notes, ...state.history],
+      history: pushHistory(state),
       lastUserAction: new Date().getTime(),
     }
   } else {
@@ -266,6 +267,7 @@ const NoteView = (props: NoteProps) => {
   const noteId = router.query.note as string
 
   const [ongoingSaves, setOngoingSaves] = useState(0)
+  const [saveFailed, setSaveFailed] = useState(false)
 
   const [error, setError] = useState<string>()
   const gainFocusRef = useRef<FocusGain | undefined>({
@@ -384,15 +386,17 @@ const NoteView = (props: NoteProps) => {
 
   const saveThroughApi = async () => {
     setOngoingSaves((os) => os + 1)
-    await fetch(`/api/note/${noteId}/save`, {
+    setSaveFailed(false)
+    // shown on the button only, setError would disable the whole page until the websocket reconnects
+    const saved = await fetch(`/api/note/${noteId}/save`, {
       method: "POST",
       body: JSON.stringify(noteState.notes),
-    })
+    }).then(
+      (result) => result.ok,
+      () => false,
+    )
+    setSaveFailed(!saved)
     setOngoingSaves((os) => os - 1)
-  }
-
-  const websocketSaveComplete = () => {
-    // setOngoingSaves((os) => os - 1)
   }
 
   const onConnect = () => {
@@ -400,15 +404,13 @@ const NoteView = (props: NoteProps) => {
     setOngoingSaves(0)
   }
 
-  const websocketEmit = useWebsocket(noteId, setError, setNotes, websocketSaveComplete, onConnect)
+  const websocketEmit = useWebsocket(noteId, setError, setNotes, onConnect)
 
   // only save on user actions, not when notes arrive from the server
   const savedUserActionRef = useRef(0)
   useEffect(() => {
     if (noteState.lastUserAction > 0 && noteState.lastUserAction !== savedUserActionRef.current) {
       savedUserActionRef.current = noteState.lastUserAction
-      // TODO disabled ongoing save on type because it causes a bunch of renders. Maybe do something smart like detect slow save?
-      // setOngoingSaves((os) => os + 1)
       const notePost: NotePost = { id: noteId, notes: noteState.notes }
       websocketEmit(WEBSOCKET_COMMAND.POST, notePost)
     }
@@ -485,13 +487,18 @@ const NoteView = (props: NoteProps) => {
             Undo
           </Button>
           <Button
-            style={{ flex: "1 0 0", height: "50px" }}
+            style={{
+              flex: "1 0 0",
+              height: "50px",
+              ...(saveFailed && { background: "#ff9b9b", borderColor: "#d10000" }),
+            }}
             onClick={saveThroughApi}
             disabled={error !== undefined}
           >
             <span style={{ paddingRight: "5px" }}>Save</span>
             {ongoingSaves > 0 && <LoadIcon style={{ width: "16px" }} />}
-            {ongoingSaves === 0 && <Check style={{ width: "16px" }} />}
+            {ongoingSaves === 0 && !saveFailed && <Check style={{ width: "16px" }} />}
+            {ongoingSaves === 0 && saveFailed && <Cross style={{ width: "12px" }} />}
           </Button>
         </footer>
       </div>

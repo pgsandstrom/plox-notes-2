@@ -1,13 +1,5 @@
 import type { QueryConfig, QueryResult, QueryResultRow } from "pg"
-import { Pool, types } from "pg"
-
-// warning: null returning instead of undefined from database might screw us. Can we transform all null to undefined?
-
-// Force count-function in database to return number instead of string
-// https://github.com/brianc/node-pg-types#use
-types.setTypeParser(20, (val: string) => {
-  return parseInt(val, 10)
-})
+import { Pool } from "pg"
 
 let dbPool: Pool | undefined
 

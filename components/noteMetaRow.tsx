@@ -3,8 +3,7 @@ import type { RefObject } from "react"
 import { useEffect, useRef } from "react"
 import TextareaAutosize from "react-textarea-autosize"
 
-import type { FocusGain } from "../pages/[note].tsx"
-import type { NoteMeta } from "../types/index.ts"
+import type { FocusGain, NoteMeta } from "../types/index.ts"
 import Button from "./button.tsx"
 import { Cross } from "./icons.tsx"
 
@@ -15,7 +14,6 @@ interface NoteRowProps {
   note: NoteMeta
   index: number
   gainFocusRef: RefObject<FocusGain | undefined>
-  disabled: boolean
   editNote: (note: NoteMeta, index: number) => void
   deleteNote: (index: number) => void
   setSpecificFocus: (index: number, char: number) => void
@@ -31,7 +29,6 @@ const NoteMetaRow = ({
   note,
   index,
   gainFocusRef,
-  disabled,
   editNote,
   deleteNote,
   setSpecificFocus,
@@ -69,7 +66,7 @@ const NoteMetaRow = ({
         className={styles.row}
         style={{ marginBottom: "20px", marginLeft: "20px" }}
       >
-        <Link href={`/${note.text}`} className={styles.link}>
+        <Link href={`/${encodeURIComponent(note.text)}`} className={styles.link}>
           {note.text}
         </Link>
       </div>
@@ -106,7 +103,6 @@ const NoteMetaRow = ({
             }
           }
         }}
-        disabled={disabled}
         ref={inputRef}
       />
       <Button onClick={() => deleteNote(index)} style={{ height: "32px", marginTop: "-4px" }}>

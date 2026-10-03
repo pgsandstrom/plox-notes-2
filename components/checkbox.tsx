@@ -1,21 +1,22 @@
+import styles from "./checkbox.module.css"
+
 interface CheckboxProps {
   checked: boolean
   onChange: (checked: boolean) => void
 }
 
-import styles from "./checkbox.module.css"
-
 export default function Checkbox({ checked, onChange }: CheckboxProps) {
   // TODO it would be cool with proper checkboxes that don't look like shit, and also has a good "focus" look.
   return (
-    <button onClick={() => onChange(!checked)} className={styles.checkbox}>
+    <button
+      role="checkbox"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={styles.checkbox}
+    >
       {checked ? (
         <svg
           aria-hidden="true"
-          focusable="false"
-          data-prefix="far"
-          data-icon="check-square"
-          role="img"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 448 512"
           style={{ width: "32px" }}
@@ -28,10 +29,6 @@ export default function Checkbox({ checked, onChange }: CheckboxProps) {
       ) : (
         <svg
           aria-hidden="true"
-          focusable="false"
-          data-prefix="far"
-          data-icon="square"
-          role="img"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 448 512"
           style={{ width: "32px" }}

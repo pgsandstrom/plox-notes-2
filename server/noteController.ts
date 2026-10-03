@@ -50,9 +50,8 @@ export const saveNote = async (id: string, notes: Note[]) => {
     throw new Error(`save note received wrong row data: ${JSON.stringify(notes)}`)
   }
 
-  const queryResult = await query(SQL`INSERT INTO note(id, data) VALUES(${id}, ${JSON.stringify(
-    notes,
-  )})
-  ON CONFLICT(id) DO UPDATE SET data=${JSON.stringify(notes)}::jsonb`)
+  const queryResult =
+    await query(SQL`INSERT INTO note(id, data) VALUES(${id}, ${JSON.stringify(notes)})
+  ON CONFLICT(id) DO UPDATE SET data = EXCLUDED.data`)
   return queryResult
 }

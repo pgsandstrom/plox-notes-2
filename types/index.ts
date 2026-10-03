@@ -22,3 +22,8 @@ export interface NoteMeta {
   id: string
   text: string
 }
+
+export interface FocusGain {
+  index: number
+  position: "start" | "end" | number
+}
