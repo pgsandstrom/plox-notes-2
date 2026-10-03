@@ -13,10 +13,10 @@ This project is a bit shit codewise and have not received any love for several y
 To start dev mode:
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 ## release
 
-Just run `npm run docker-build && npm run docker-up` and you are good to go.
+Just run `pnpm docker-build && pnpm docker-up` and you are good to go.
