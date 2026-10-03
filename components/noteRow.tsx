@@ -2,13 +2,14 @@ import type { RefObject } from "react"
 import { memo, useEffect, useRef } from "react"
 import TextareaAutosize from "react-textarea-autosize"
 
-import useAnimateOrder from "../hooks/useAnimateOrder.ts"
 import useKey from "../hooks/useKey.ts"
 import type { FocusGain } from "../pages/[note].tsx"
 import type { Note } from "../types/index.ts"
 import Button from "./button.tsx"
 import Checkbox from "./checkbox.tsx"
 import { Cross } from "./icons.tsx"
+
+import styles from "./noteRow.module.css"
 
 const SWIPE_INDENTATION_LIMIT = 30
 const SWIPE_MAX_Y_DIFF = 25
@@ -38,7 +39,6 @@ const NoteRow = ({
   setSpecificFocus,
   setIndentation,
 }: NoteRowProps) => {
-  const ref = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const startTouchRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
@@ -46,8 +46,9 @@ const NoteRow = ({
   // Currently when deleting a row with keyboard presses on mobile the keyboard flickers.
   // I have tried moving focus gaining to before deleting rows, but it results in weird bugs on mobile.
   // Since debugging stuff like that is super frustrating on mobile, I have given up on fixing this.
-  const gainFocus = gainFocusRef.current
+  // runs after every render, since the parent sets gainFocusRef right before the render that should take focus
   useEffect(() => {
+    const gainFocus = gainFocusRef.current
     const inputElement = inputRef.current
     if (gainFocus?.index === index && inputElement) {
       const inputLength = inputElement.value.length
@@ -62,7 +63,7 @@ const NoteRow = ({
       inputElement.focus()
       gainFocusRef.current = undefined
     }
-  }, [index, gainFocus, gainFocusRef])
+  })
 
   const increaseIndentation = () => {
     if (note.indentation < 3) {
@@ -96,15 +97,10 @@ const NoteRow = ({
     },
   )
 
-  useAnimateOrder(index, ref)
-
-  // TODO our style here is global to work in TextareaAutosize. styled-jsx would like to solve this by using "resolve"
-  // But resolve does not seem to be bundled with nextjs. Find a neat solution.
   return (
     <div
-      key={note.id}
-      ref={ref}
-      className={`note-row ${note.checked && "checked"}`}
+      data-animate-id={note.id}
+      className={note.checked ? `${styles.row} ${styles.checked}` : styles.row}
       style={{
         marginLeft: note.indentation * 15,
       }}
@@ -116,7 +112,8 @@ const NoteRow = ({
         }}
       />
       <TextareaAutosize
-        className="note-row-input"
+        className={styles.input}
+        data-note-input
         value={note.text}
         onChange={(e) => {
           editNote({ ...note, text: e.target.value }, index)
@@ -180,39 +177,6 @@ const NoteRow = ({
       >
         <Cross style={{ marginTop: "8px", width: "16px" }} />
       </Button>
-      <style jsx global>{`
-        .note-row {
-          display: flex;
-          align-items: center;
-          margin: 6px 0;
-          transition: margin 100ms ease-in-out;
-        }
-
-        .note-row-input {
-          border: none;
-          border-bottom: 1px solid gray;
-          flex: 1 0 0;
-          font-size: 1.2em;
-          height: 28px;
-          margin-left: 10px;
-          line-height: 28px;
-          outline: none;
-          resize: none;
-        }
-
-        .note-row-input:focus {
-          border-bottom: 1px solid #009fd1;
-        }
-
-        .checked {
-          color: #bebfbf;
-        }
-
-        .checked .note-row-input {
-          color: #bebfbf;
-          text-decoration: line-through;
-        }
-      `}</style>
     </div>
   )
 }

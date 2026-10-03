@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef } from "react"
-import type { Socket } from "socket.io-client"
-import socketio from "socket.io-client"
+import { useCallback, useEffect, useEffectEvent, useRef } from "react"
+import socketio, { type Socket } from "socket.io-client"
 
 import { WEBSOCKET_COMMAND } from "../server/websocketConstants.ts"
 import type { Note, NotePost } from "../types/index.ts"
@@ -13,66 +12,68 @@ export default function useWebsocket(
   saveComplete: () => void,
   onConnect: () => void,
 ): (command: string, data: unknown) => void {
-  // hax so websocket stuff is not ran on SSR
-  if (typeof window === "undefined") {
-    return {} as any
-  }
-  // hooks are only skipped during SSR, so the call order is stable on the client
-  /* oxlint-disable @eslint-react/rules-of-hooks */
-
   const socketRef = useRef<Socket>(undefined)
 
-  if (socketRef.current === undefined) {
+  // the socket lives as long as the effect, so these always call the latest callbacks
+  const onConnectEvent = useEffectEvent(onConnect)
+  const setErrorEvent = useEffectEvent(setError)
+  const setNotesEvent = useEffectEvent(setNotes)
+  const saveCompleteEvent = useEffectEvent(saveComplete)
+
+  // effects do not run during SSR, so the socket is only created in the browser
+  useEffect(() => {
     const socket: Socket = socketio({
       reconnectionDelay: 300,
       reconnectionDelayMax: 1500,
     })
     socketRef.current = socket
     socket.on("connect", () => {
-      onConnect()
+      onConnectEvent()
       socket.emit(WEBSOCKET_COMMAND.SET_ID, noteId)
     })
     socket.on("connect_error", () => {
-      setError("Connect error")
+      setErrorEvent("Connect error")
     })
     socket.on(WEBSOCKET_COMMAND.LOAD, (data: NotePost) => {
-      setNotes(data.notes)
+      setNotesEvent(data.notes)
     })
     socket.on(WEBSOCKET_COMMAND.SERVER_ERROR, (data: string) => {
-      setError(data)
+      setErrorEvent(data)
     })
     socket.on("ok", () => {
-      saveComplete()
+      saveCompleteEvent()
     })
     socket.on("disconnect", () => {
-      setError("Disconnected")
+      setErrorEvent("Disconnected")
     })
     // reconnection events are emitted by the manager, not the socket
     socket.io.on("reconnect_error", () => {
-      setError("Reconnect error")
+      setErrorEvent("Reconnect error")
     })
     socket.io.on("reconnect_failed", () => {
-      setError("Reconnect failed")
+      setErrorEvent("Reconnect failed")
     })
-  }
 
-  // Currently, when returning to a sleeping tab, it takes several seconds to determine that we are disconnected.
-  // This useEffect is an attempt to fix this.
-  useEffect(() => {
+    // Currently, when returning to a sleeping tab, it takes several seconds to determine that we are disconnected.
+    // This is an attempt to fix this.
     const visibilityChangeCb = () => {
-      if (document.visibilityState === "visible") {
-        if (socketRef.current && !socketRef.current.connected) {
-          socketRef.current.close().open()
-        }
+      if (document.visibilityState === "visible" && !socket.connected) {
+        socket.close().open()
       }
     }
     document.addEventListener("visibilitychange", visibilityChangeCb)
+
     return () => {
       document.removeEventListener("visibilitychange", visibilityChangeCb)
+      // remove listeners first, so closing does not report "Disconnected"
+      socket.removeAllListeners()
+      socket.io.removeAllListeners()
+      socket.close()
+      socketRef.current = undefined
     }
-  }, [])
+  }, [noteId])
 
   return useCallback((command: string, data: unknown) => {
-    socketRef.current!.emit(command, data)
+    socketRef.current?.emit(command, data)
   }, [])
 }

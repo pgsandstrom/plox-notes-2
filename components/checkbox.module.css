@@ -1,0 +1,7 @@
+.checkbox {
+  cursor: pointer;
+  border: none;
+  background: none;
+  margin-left: 1px; /* needed so entire outline is visible */
+  padding: 0px;
+}

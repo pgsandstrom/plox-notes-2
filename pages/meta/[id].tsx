@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid"
 import Button from "../../components/button.tsx"
 import { Check, LoadIcon } from "../../components/icons.tsx"
 import NoteMetaRow from "../../components/noteMetaRow.tsx"
+import useAnimateOrder from "../../hooks/useAnimateOrder.ts"
 import { loadOrShowNewMeta } from "../../server/noteMetaController.ts"
 import type { NoteMeta } from "../../types/index.ts"
 import type { FocusGain } from "../[note].tsx"
@@ -164,8 +165,8 @@ const NoteMetaView = (props: NoteMetaProps) => {
     // This is to avoid just clicking the delete button and the onscreen keyboard showing up on mobile
     if (
       index > 0 &&
-      document.activeElement &&
-      document.activeElement.className.includes("note-row-input")
+      document.activeElement instanceof HTMLElement &&
+      document.activeElement.dataset.noteInput !== undefined
     ) {
       gainFocusRef.current = {
         index: index - 1,
@@ -203,26 +204,27 @@ const NoteMetaView = (props: NoteMetaProps) => {
   const saveThroughApi = async () => {
     setOngoingSaves((os) => os + 1)
     setEditing(false)
-    try {
-      const result = await fetch(`/api/meta/${noteMetaId}/save`, {
-        method: "POST",
-        body: JSON.stringify(noteState.metaList),
-      })
-      if (result.status >= 200 && result.status < 300) {
-        setError(undefined)
-      } else {
-        setError("Save failed")
-      }
-    } catch {
-      setError("Save failed")
-    }
+    const saved = await fetch(`/api/meta/${noteMetaId}/save`, {
+      method: "POST",
+      body: JSON.stringify(noteState.metaList),
+    }).then(
+      (result) => result.ok,
+      () => false,
+    )
+    setError(saved ? undefined : "Save failed")
     setOngoingSaves((os) => os - 1)
   }
+
+  const listRef = useRef<HTMLDivElement>(null)
+  useAnimateOrder(listRef)
 
   // TODO make us get updates through websocket
 
   return (
-    <div style={{ display: "flex", width: "100vw", maxWidth: "100%", height: "100%" }}>
+    <div
+      className="no-page-scroll"
+      style={{ display: "flex", width: "100vw", maxWidth: "100%", height: "100%" }}
+    >
       <Head>
         <title>{noteMetaId}</title>
       </Head>
@@ -250,7 +252,7 @@ const NoteMetaView = (props: NoteMetaProps) => {
           </div>
         )}
         <div style={{ fontSize: "2em", textAlign: "center", margin: "10px 0" }}>{noteMetaId}</div>
-        <div style={{ flex: "1 0 0", overflowY: "auto" }}>
+        <div ref={listRef} style={{ flex: "1 0 0", overflowY: "auto" }}>
           {noteState.metaList.map((noteMeta, index) => (
             <NoteMetaRow
               key={noteMeta.id}
@@ -302,16 +304,6 @@ const NoteMetaView = (props: NoteMetaProps) => {
           )}
         </footer>
       </div>
-      <style jsx>{`
-        .plox {
-          flex: 1 0 0;
-        }
-      `}</style>
-      <style jsx global>{`
-        html {
-          overflow-y: hidden;
-        }
-      `}</style>
     </div>
   )
 }

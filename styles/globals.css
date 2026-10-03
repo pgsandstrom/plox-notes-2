@@ -22,3 +22,8 @@ textarea {
 * {
   box-sizing: border-box;
 }
+
+/* the note pages scroll inside their list instead */
+html:has(.no-page-scroll) {
+  overflow-y: hidden;
+}

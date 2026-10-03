@@ -6,8 +6,6 @@ import type { KnipConfig } from "knip"
 const config: KnipConfig = {
   entry: ["server/index.ts!"],
   project: ["**/*.{ts,tsx}!"],
-  // used implicitly by Next's compiler for every `<style jsx>`
-  ignoreDependencies: ["styled-jsx"],
   // an export used inside its own file is a style nit, not dead code
   ignoreExportsUsedInFile: true,
 }

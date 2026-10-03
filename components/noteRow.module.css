@@ -1,0 +1,36 @@
+/* shared by noteRow and noteMetaRow */
+.row {
+  display: flex;
+  align-items: center;
+  margin: 6px 0;
+  transition: margin 100ms ease-in-out;
+}
+
+.link {
+  font-size: 1.2em;
+}
+
+.input {
+  border: none;
+  border-bottom: 1px solid gray;
+  flex: 1 0 0;
+  font-size: 1.2em;
+  height: 28px;
+  margin-left: 10px;
+  line-height: 28px;
+  outline: none;
+  resize: none;
+}
+
+.input:focus {
+  border-bottom: 1px solid #009fd1;
+}
+
+.checked {
+  color: #bebfbf;
+}
+
+.checked .input {
+  color: #bebfbf;
+  text-decoration: line-through;
+}

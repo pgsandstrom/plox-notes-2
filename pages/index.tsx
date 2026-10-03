@@ -3,6 +3,8 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { useState } from "react"
 
+import styles from "./index.module.css"
+
 export default function Home() {
   const router = useRouter()
   const [isRouting, setIsRouting] = useState(false)
@@ -38,11 +40,11 @@ export default function Home() {
           }}
         >
           <h1>Welcome to Bös</h1>
-          <div className="intro-text">Minimalistic and simple checklist sharing.</div>
-          <div className="intro-text">
+          <div className={styles.introText}>Minimalistic and simple checklist sharing.</div>
+          <div className={styles.introText}>
             Enter a hard to guess string below, like 'AlexCoolShoppingList2000' and click 'go'.
           </div>
-          <div className="intro-text">
+          <div className={styles.introText}>
             Share the checklist by simply sending the URL to your friends. Secure? Not completely.
             But it sure is simple. And no one cares about your shopping list anyway.
           </div>
@@ -87,11 +89,6 @@ export default function Home() {
           </span>
         </footer>
       </div>
-      <style jsx>{`
-        .intro-text {
-          margin-bottom: 10px;
-        }
-      `}</style>
     </div>
   )
 }
