@@ -1,26 +1,22 @@
-import type socketio from "socket.io"
+import type { Server } from "socket.io"
 
 import type { NotePost } from "../types/index.ts"
 import { loadNote, saveNote } from "./noteController.ts"
 import { WEBSOCKET_COMMAND } from "./websocketConstants.ts"
 
-interface NoteConnection {
-  noteId: string
-  socket: socketio.Socket
-}
-
-const activeSockets = new Map<string, NoteConnection>()
-
-export default (io: socketio.Server) => {
+// Every socket joins a room named after its note id, so updates can be sent to everyone on that note.
+// socket.io leaves all rooms by itself on disconnect.
+export default (io: Server) => {
   // TODO really using the rest interface to update data should trigger all websockets to send out new data... but you know...
-  io.sockets.on("connection", (socket) => {
-    activeSockets.set(socket.id, { noteId: "", socket })
+  io.on("connection", (socket) => {
+    let currentNoteId: string | undefined
+
     socket.on(WEBSOCKET_COMMAND.SET_ID, (noteId: string) => {
-      const connection = activeSockets.get(socket.id)
-      if (connection === undefined) {
-        return
+      if (currentNoteId !== undefined) {
+        void socket.leave(currentNoteId)
       }
-      connection.noteId = noteId
+      currentNoteId = noteId
+      void socket.join(noteId)
       // When client clarifies who they are, send out the data to them!
       // This is good when a client disconnects and then connects again.
       loadNote(noteId)
@@ -39,19 +35,14 @@ export default (io: socketio.Server) => {
       const { id, notes } = data
       saveNote(id, notes)
         .then(() => {
-          Array.from(activeSockets.entries())
-            .filter(([socketId]) => socketId !== socket.id) // Remove own socket
-            .filter(([, connection]) => connection.noteId === id) // Remove users in other notes
-            .map(([, connection]) => connection.socket)
-            .forEach((otherSocket) => otherSocket.emit(WEBSOCKET_COMMAND.LOAD, { id, notes }))
+          // socket.to() sends to everyone in the room except this socket
+          const noteData: NotePost = { id, notes }
+          socket.to(id).emit(WEBSOCKET_COMMAND.LOAD, noteData)
         })
         .catch((e: unknown) => {
           console.error(`failed saving note ${id}`, e)
           socket.emit(WEBSOCKET_COMMAND.SERVER_ERROR, "Save error")
         })
-    })
-    socket.on("disconnect", () => {
-      activeSockets.delete(socket.id)
     })
   })
 }

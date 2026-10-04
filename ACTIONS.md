@@ -8,7 +8,6 @@ Leftovers from the big update. Roughly ordered by importance within each section
 
 ## Simplifications
 
-- [ ] **Use socket.io rooms in `server/websocket.ts`.** `socket.join(noteId)` and `socket.to(id).emit(...)` replace the hand-written `activeSockets` map and filter chain.
 - [ ] **Drop manual memoization.** The React Compiler is enabled, so the `useCallback(..., [dispatch])` wrappers in `pages/[note].tsx` and the custom `memo` comparator in NoteRow should be redundant. Verify that rendering behaves the same.
 
 ## Small and cosmetic
