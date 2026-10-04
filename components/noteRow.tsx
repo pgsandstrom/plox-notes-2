@@ -2,7 +2,6 @@ import type { RefObject } from "react"
 import { memo, useEffect, useRef } from "react"
 import TextareaAutosize from "react-textarea-autosize"
 
-import useKey from "../hooks/useKey.ts"
 import type { FocusGain, Note } from "../types/index.ts"
 import Button from "./button.tsx"
 import Checkbox from "./checkbox.tsx"
@@ -76,26 +75,6 @@ const NoteRow = ({
     }
   }
 
-  // TODO it would be nicer to have one root useKey instead of one per row like this, but it would require some hax
-  useKey(
-    (key) => {
-      if (document.activeElement !== inputRef.current) {
-        return
-      }
-      if (key === "h" || key === "ArrowLeft") {
-        decreaseIndentation()
-      } else {
-        increaseIndentation()
-      }
-    },
-    ["ArrowRight", "h", "ArrowLeft", "l"],
-    "keydown",
-    false,
-    {
-      alt: true,
-    },
-  )
-
   return (
     <div
       data-animate-id={note.id}
@@ -118,6 +97,16 @@ const NoteRow = ({
           editNote({ ...note, text: e.target.value }, index)
         }}
         onKeyDown={(e) => {
+          if (e.altKey && (e.key === "ArrowLeft" || e.key === "h")) {
+            e.preventDefault()
+            decreaseIndentation()
+            return
+          }
+          if (e.altKey && (e.key === "ArrowRight" || e.key === "l")) {
+            e.preventDefault()
+            increaseIndentation()
+            return
+          }
           const inputElement = inputRef.current
           if (
             e.key === "Backspace" &&
