@@ -20,10 +20,10 @@ export const getServerSideProps: GetServerSideProps<NoteMetaProps> = async (cont
   return { props: { metaList: data.data } }
 }
 
-const newMeta = (text?: string): NoteMeta => {
+const newMeta = (text = ""): NoteMeta => {
   return {
     id: uuidv4(),
-    text: text ?? "",
+    text,
   }
 }
 
@@ -36,7 +36,6 @@ interface NoteMetaState {
 interface AddMetaAction {
   type: "ADD_META_ACTION"
   index: number
-  text?: string
 }
 
 interface DeleteMetaAction {
@@ -82,7 +81,7 @@ const NoteMetaView = (props: NoteMetaProps) => {
         return {
           metaList: [
             ...state.metaList.slice(0, action.index),
-            newMeta(action.text),
+            newMeta(),
             ...state.metaList.slice(action.index, state.metaList.length),
           ],
           history: pushHistory(state),
@@ -98,10 +97,15 @@ const NoteMetaView = (props: NoteMetaProps) => {
           lastUserAction: new Date().getTime(),
         }
       } else if (action.type === "EDIT_META_ACTION") {
+        // a newline (enter or a multi-line paste) splits the row, every extra line becomes a new row
+        const [firstLine, ...newLines] = action.note.text.split(/\r?\n/)
         return {
-          metaList: state.metaList.map((note, index) =>
-            index === action.index ? action.note : note,
-          ),
+          metaList: [
+            ...state.metaList.slice(0, action.index),
+            { ...action.note, text: firstLine },
+            ...newLines.map((text) => newMeta(text)),
+            ...state.metaList.slice(action.index + 1),
+          ],
           history: pushHistory(state),
           lastUserAction: new Date().getTime(),
         }
@@ -126,11 +130,10 @@ const NoteMetaView = (props: NoteMetaProps) => {
     },
   )
 
-  const addNote = (index: number, text?: string) => {
+  const addNote = (index: number) => {
     dispatch({
       type: "ADD_META_ACTION",
       index,
-      text,
     })
     gainFocusRef.current = {
       index,
@@ -158,10 +161,14 @@ const NoteMetaView = (props: NoteMetaProps) => {
   }
 
   const editNote = (note: NoteMeta, index: number) => {
-    if (note.text.includes("\n")) {
-      const [original, newText] = note.text.split("\n")
-      note.text = original
-      addNote(index + 1, newText)
+    // newlines split the row (see the reducer), focus goes to the last new row.
+    // After enter the cursor belongs at its start, after a multi-line paste at its end.
+    const newLineCount = note.text.split(/\r?\n/).length - 1
+    if (newLineCount > 0) {
+      gainFocusRef.current = {
+        index: index + newLineCount,
+        position: newLineCount === 1 ? "start" : "end",
+      }
     }
     dispatch({
       type: "EDIT_META_ACTION",

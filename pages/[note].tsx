@@ -132,40 +132,23 @@ const noteReducer = (state: NoteState, action: NoteAction): NoteState => {
       lastUserAction: new Date().getTime(),
     }
   } else if (action.type === "EDIT_NOTE_ACTION") {
-    let newNote: Note | undefined
-    let editedNote: Note
-    if (action.note.text.includes("\n")) {
-      const [original, newText] = action.note.text.split("\n")
-      editedNote = {
-        ...action.note,
-        text: original,
-      }
+    // a newline (enter or a multi-line paste) splits the row, every extra line becomes a new row
+    const [firstLine, ...newLines] = action.note.text.split(/\r?\n/)
+    const editedNote = { ...action.note, text: firstLine }
 
-      const isLastCheckedNote =
-        state.notes.length - 1 === action.index || state.notes[action.index + 1].checked === false
-      newNote = createNewNote(
-        isLastCheckedNote ? false : editedNote.checked,
-        newText,
-        editedNote.indentation,
-      )
-    } else {
-      editedNote = action.note
-    }
-
-    let newNotes = state.notes.map((note, index) => {
-      return index === action.index ? editedNote : note
-    })
-
-    if (newNote) {
-      newNotes = [
-        ...newNotes.slice(0, action.index + 1),
-        newNote,
-        ...newNotes.slice(action.index + 1, newNotes.length),
-      ]
-    }
+    const isLastCheckedNote =
+      state.notes.length - 1 === action.index || !state.notes[action.index + 1].checked
+    const newNotes = newLines.map((text) =>
+      createNewNote(isLastCheckedNote ? false : editedNote.checked, text, editedNote.indentation),
+    )
 
     return {
-      notes: newNotes,
+      notes: [
+        ...state.notes.slice(0, action.index),
+        editedNote,
+        ...newNotes,
+        ...state.notes.slice(action.index + 1),
+      ],
       history: pushHistory(state),
       lastUserAction: new Date().getTime(),
     }
@@ -344,11 +327,13 @@ const NoteView = (props: NoteProps) => {
 
   const editNote = useCallback(
     (note: Note, index: number) => {
-      // a newline splits the row in two (see the reducer), focus goes to the new row
-      if (note.text.includes("\n")) {
+      // newlines split the row (see the reducer), focus goes to the last new row.
+      // After enter the cursor belongs at its start, after a multi-line paste at its end.
+      const newLineCount = note.text.split(/\r?\n/).length - 1
+      if (newLineCount > 0) {
         gainFocusRef.current = {
-          index: index + 1,
-          position: "start",
+          index: index + newLineCount,
+          position: newLineCount === 1 ? "start" : "end",
         }
       }
       dispatch({
