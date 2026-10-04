@@ -23,6 +23,8 @@ export default function useWebsocket(
     const socket: Socket = socketio({
       reconnectionDelay: 300,
       reconnectionDelayMax: 1500,
+      // silently close on page reload/close, so "Disconnected" is not flashed
+      closeOnBeforeunload: true,
     })
     socketRef.current = socket
     socket.on("connect", () => {
