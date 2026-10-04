@@ -169,17 +169,6 @@ const NoteRow = ({
   )
 }
 
-const isPropsEqual = (prev: NoteRowProps, next: NoteRowProps) => {
-  return (
-    prev.disabled === next.disabled &&
-    prev.index === next.index &&
-    prev.note.text === next.note.text &&
-    prev.note.checked === next.note.checked &&
-    prev.note.indentation === next.note.indentation &&
-    prev.previousNote?.text === next.previousNote?.text &&
-    prev.previousNote?.checked === next.previousNote?.checked &&
-    prev.previousNote?.indentation === next.previousNote?.indentation
-  )
-}
-
-export default memo(NoteRow, isPropsEqual)
+// the reducers keep unchanged notes as the same objects and the compiler keeps the callbacks stable,
+// so rows that did not change skip rendering
+export default memo(NoteRow)

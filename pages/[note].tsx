@@ -1,7 +1,7 @@
 import type { GetServerSideProps } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useCallback, useEffect, useReducer, useRef, useState } from "react"
+import { useEffect, useReducer, useRef, useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 
 import Button from "../components/button.tsx"
@@ -265,109 +265,91 @@ const NoteView = (props: NoteProps) => {
     lastUserAction: 0,
   })
 
-  const setNotes = useCallback(
-    (notes: Note[]) => {
-      dispatch({
-        type: "SET_NOTE_ACTION",
-        notes,
-      })
-    },
-    [dispatch],
-  )
+  const setNotes = (notes: Note[]) => {
+    dispatch({
+      type: "SET_NOTE_ACTION",
+      notes,
+    })
+  }
 
-  const addNote = useCallback(
-    (index: number, text: string, checked: boolean, indentation: number) => {
-      dispatch({
-        type: "ADD_NOTE_ACTION",
-        index,
-        text,
-        checked,
-        indentation,
-      })
+  const addNote = (index: number, text: string, checked: boolean, indentation: number) => {
+    dispatch({
+      type: "ADD_NOTE_ACTION",
+      index,
+      text,
+      checked,
+      indentation,
+    })
+    gainFocusRef.current = {
+      index,
+      position: "start",
+    }
+  }
+
+  const deleteNote = (index: number) => {
+    dispatch({
+      type: "DELETE_NOTE_ACTION",
+      index,
+    })
+    // Only set the focus if we currently focus a note row input
+    // This is to avoid just clicking the delete button and the onscreen keyboard showing up on mobile
+    if (
+      index > 0 &&
+      document.activeElement instanceof HTMLElement &&
+      document.activeElement.dataset.noteInput !== undefined
+    ) {
       gainFocusRef.current = {
-        index,
-        position: "start",
+        index: index - 1,
+        position: "end",
       }
-    },
-    [dispatch],
-  )
+    }
+  }
 
-  const deleteNote = useCallback(
-    (index: number) => {
-      dispatch({
-        type: "DELETE_NOTE_ACTION",
-        index,
-      })
-      // Only set the focus if we currently focus a note row input
-      // This is to avoid just clicking the delete button and the onscreen keyboard showing up on mobile
-      if (
-        index > 0 &&
-        document.activeElement instanceof HTMLElement &&
-        document.activeElement.dataset.noteInput !== undefined
-      ) {
-        gainFocusRef.current = {
-          index: index - 1,
-          position: "end",
-        }
+  const checkNote = (checked: boolean, index: number) => {
+    dispatch({
+      type: "CHECK_NOTE_ACTION",
+      checked,
+      index,
+    })
+  }
+
+  const editNote = (note: Note, index: number) => {
+    // newlines split the row (see the reducer), focus goes to the last new row.
+    // After enter the cursor belongs at its start, after a multi-line paste at its end.
+    const newLineCount = note.text.split(/\r?\n/).length - 1
+    if (newLineCount > 0) {
+      gainFocusRef.current = {
+        index: index + newLineCount,
+        position: newLineCount === 1 ? "start" : "end",
       }
-    },
-    [dispatch],
-  )
+    }
+    dispatch({
+      type: "EDIT_NOTE_ACTION",
+      note,
+      index,
+    })
+  }
 
-  const checkNote = useCallback(
-    (checked: boolean, index: number) => {
-      dispatch({
-        type: "CHECK_NOTE_ACTION",
-        checked,
-        index,
-      })
-    },
-    [dispatch],
-  )
-
-  const editNote = useCallback(
-    (note: Note, index: number) => {
-      // newlines split the row (see the reducer), focus goes to the last new row.
-      // After enter the cursor belongs at its start, after a multi-line paste at its end.
-      const newLineCount = note.text.split(/\r?\n/).length - 1
-      if (newLineCount > 0) {
-        gainFocusRef.current = {
-          index: index + newLineCount,
-          position: newLineCount === 1 ? "start" : "end",
-        }
-      }
-      dispatch({
-        type: "EDIT_NOTE_ACTION",
-        note,
-        index,
-      })
-    },
-    [dispatch],
-  )
-
-  const setSpecificFocus = useCallback((index: number, char: number) => {
+  const setSpecificFocus = (index: number, char: number) => {
     gainFocusRef.current = {
       index: index,
       position: char,
     }
-  }, [])
+  }
 
-  const undo = useCallback(() => {
+  const undo = () => {
     dispatch({
       type: "UNDO_ACTION",
     })
-  }, [dispatch])
+  }
 
-  const setIndentation = useCallback(
-    (index: number, indentation: number) => {
-      dispatch({
-        type: "INDENTATION_ACTION",
-        index,
-        indentation,
-      })
-    },
-    [dispatch],
-  )
+  const setIndentation = (index: number, indentation: number) => {
+    dispatch({
+      type: "INDENTATION_ACTION",
+      index,
+      indentation,
+    })
+  }
 
   const saveThroughApi = async () => {
     setOngoingSaves((os) => os + 1)

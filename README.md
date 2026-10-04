@@ -6,8 +6,6 @@ This is the followup to the ancient PloxNotes project. This uses next.js instead
 
 It uses a custom server to enable websocket usage on the server. In hindsight, it would have been better to use default server and simply have websocket logic in a separate node process. But you know, what's done is done. No big deal.
 
-This project is a bit shit codewise and have not received any love for several years. But it works. Thats something.
-
 ## Getting Started
 
 You need Node 24, pnpm and Docker.
