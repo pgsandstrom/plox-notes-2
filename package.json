@@ -15,7 +15,7 @@
     "pre-commit": "lint-staged",
     "pre-push": "pnpm run validate && pnpm run format:check",
     "prepare": "husky",
-    "release": "docker compose up -d --build",
+    "release": "docker compose build --pull && docker compose up -d",
     "start": "NODE_ENV=production node server/index.ts",
     "typecheck": "next typegen && tsc --noEmit",
     "validate": "pnpm run typecheck && pnpm run lint"
@@ -54,6 +54,9 @@
     "!(*.{js,jsx,ts,tsx,mjs,cjs,mts,cts})": [
       "oxfmt --no-error-on-unmatched-pattern"
     ]
+  },
+  "engines": {
+    "node": ">=24.22.1"
   },
   "packageManager": "pnpm@12.8.1"
 }
