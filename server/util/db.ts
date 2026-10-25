@@ -14,10 +14,12 @@ const getDbPool = () => {
 }
 
 // Use this for single query
-export const query = <T extends QueryResultRow = any>(stuff: QueryConfig) =>
+export const query = <T extends QueryResultRow = QueryResultRow>(stuff: QueryConfig) =>
   getDbPool().query<T>(stuff)
 
-export const querySingle = async <T extends QueryResultRow = any>(stuff: QueryConfig) => {
+export const querySingle = async <T extends QueryResultRow = QueryResultRow>(
+  stuff: QueryConfig,
+) => {
   const result: QueryResult<T> = await getDbPool().query(stuff)
   return getSingle<T>(result)
 }
@@ -32,7 +34,7 @@ const getSingle = <T extends QueryResultRow>(result: QueryResult<T>): T | undefi
   }
 }
 
-export const SQL = (parts: TemplateStringsArray, ...values: any[]): QueryConfig => ({
+export const SQL = (parts: TemplateStringsArray, ...values: unknown[]): QueryConfig => ({
   text: parts.reduce((prev, curr, i) => prev + "$" + i + curr),
   values,
 })
