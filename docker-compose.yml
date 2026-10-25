@@ -9,7 +9,7 @@ services:
       - PGHOST=db
     restart: always
   db:
-    image: postgres:16
+    image: postgres:18
     restart: always
     environment:
       - POSTGRES_USER=postgres
@@ -19,7 +19,10 @@ services:
     # ports:
     # - '5432:5432'
     volumes:
-      - db:/var/lib/postgresql/data
+      # 18 keeps its data in /var/lib/postgresql/18/docker, so the volume mounts one level up
+      - db18:/var/lib/postgresql
       - ./db/:/docker-entrypoint-initdb.d/
 volumes:
+  # The Postgres 16 data, no longer mounted. Kept as the rollback until 18 has proven itself.
   db:
+  db18:

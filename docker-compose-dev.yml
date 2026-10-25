@@ -11,3 +11,4 @@ services:
       - "${PGPORT:-5433}:5432"
 volumes:
   db:
+  db18:

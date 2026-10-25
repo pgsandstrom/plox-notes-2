@@ -14,4 +14,4 @@ Leftovers from the big update. Roughly ordered by importance within each section
 
 - [ ] Make `id` a `PRIMARY KEY` instead of a nullable `UNIQUE` in `note`/`note_meta`.
 - [ ] One-off migration to set `indentation` on old notes, then drop `NoteDb` and `noteDbToNote`.
-- [ ] Upgrade Postgres 16 (requires a dump and restore of the volume).
+- [x] Upgrade Postgres 16 (requires a dump and restore of the volume).
